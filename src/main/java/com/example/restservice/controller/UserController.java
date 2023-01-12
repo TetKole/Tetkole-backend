@@ -1,50 +1,66 @@
 package com.example.restservice.controller;
 
-import com.example.restservice.dao.UserJdbcDao;
 import com.example.restservice.model.User;
+import com.example.restservice.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
     @Autowired
-    public UserJdbcDao userDao;
+    public UserRepository userRepository;
 
     @PostMapping ()
-    public int inscription(
-            @RequestParam(value = "firstName") String firstName,
-            @RequestParam(value = "lastName") String lastName,
-            @RequestParam(value = "password") String password,
-            @RequestParam(value = "mail") String mail,
-            @RequestParam(value = "role") String role)
+    public ResponseEntity<User> postInscription(@RequestBody User newUser)
     {
-        User newUser = new User(firstName, lastName, password, mail, role);
-        return userDao.insert(newUser);
+        User user = userRepository.save(new User(
+                newUser.getFirstName(),
+                newUser.getLastName(),
+                newUser.getPassword(),
+                newUser.getMail(),
+                newUser.getRole()
+        ));
+        return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
     @PostMapping ("/login")
-    public User login(
-            @RequestParam(value = "password") String password,
-            @RequestParam(value = "mail") String mail)
+    public ResponseEntity<Boolean> postLogin( @RequestParam(value = "password") String password, @RequestParam(value = "mail") String mail)
     {
-        return userDao.login(mail,password);
+        Optional<User> user = userRepository.findOneByMail(mail);
+        return user.map(value ->
+                value.getPassword().equals(password) ?
+                        new ResponseEntity<>(true, HttpStatus.OK) :
+                        new ResponseEntity<>(false, HttpStatus.OK)
+        ).orElseGet(() ->
+                new ResponseEntity<>(HttpStatus.NO_CONTENT));
     }
 
     @GetMapping ("/{userId}")
-    public User findById( @PathVariable int userId)
+    public ResponseEntity<User> getUser(@PathVariable int userId)
     {
-        return userDao.findById(userId);
+        Optional<User> user = userRepository.findById(userId);
+        return user.map(value -> // value is present
+                new ResponseEntity<>(value, HttpStatus.OK)
+        ).orElseGet(() ->
+                new ResponseEntity<>(HttpStatus.NO_CONTENT)
+        );
     }
 
     @GetMapping ()
-    public List<User> findAll()
+    public ResponseEntity<List<User>> getAll()
     {
-        return userDao.findAll();
+        List<User> listUsers = userRepository.findAll();
+        if(listUsers.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(listUsers,HttpStatus.OK);
     }
-
 
 }

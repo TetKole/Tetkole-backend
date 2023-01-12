@@ -1,23 +1,24 @@
 package com.example.restservice.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
+@Table(name= "user")
 public class User {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int userId;
 
+    @Column(name = "firstName")
     private String firstName;
+    @Column(name = "lastName")
     private String lastName;
-
+    @Column(name = "password")
     private String password;
-
+    @Column(name = "mail")
     private String mail;
-
+    @Column(name = "role")
     private String role;
 
     public User() {
