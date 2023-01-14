@@ -31,15 +31,18 @@ public class UserController {
     }
 
     @PostMapping ("/login")
-    public ResponseEntity<Boolean> postLogin( @RequestParam(value = "password") String password, @RequestParam(value = "mail") String mail)
+    public ResponseEntity<?> postLogin( @RequestParam(value = "password") String password, @RequestParam(value = "mail") String mail)
     {
         Optional<User> user = userRepository.findOneByMail(mail);
-        return user.map(value ->
-                value.getPassword().equals(password) ?
-                        new ResponseEntity<>(true, HttpStatus.OK) :
-                        new ResponseEntity<>(false, HttpStatus.OK)
-        ).orElseGet(() ->
-                new ResponseEntity<>(HttpStatus.NO_CONTENT));
+
+        return user.map((value) -> {
+            if (value.getPassword().equals(password))
+                return new ResponseEntity<>(value, HttpStatus.OK);
+            else
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }).orElseGet(() ->
+                new ResponseEntity<>(HttpStatus.NO_CONTENT)
+        );
     }
 
     @GetMapping ("/{userId}")
