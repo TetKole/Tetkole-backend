@@ -1,4 +1,4 @@
-package com.example.restservice.model;
+package com.tetkole.restservice.models;
 
 import jakarta.persistence.*;
 
