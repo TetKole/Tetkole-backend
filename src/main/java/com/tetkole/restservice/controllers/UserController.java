@@ -38,14 +38,13 @@ public class UserController {
     JwtUtils jwtUtils;
 
     @PostMapping ()
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest)
+    public ResponseEntity<?> registerUser(@RequestBody SignupRequest signUpRequest)
     {
         if (userRepository.existsByMail(signUpRequest.getMail())) {
             return ResponseEntity
                     .badRequest()
                     .body("Error: Mail is already taken!");
         }
-
 
         userRepository.save(new User(
                 signUpRequest.getFirstName(),
