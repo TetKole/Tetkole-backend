@@ -38,7 +38,7 @@ public class UserController {
     JwtUtils jwtUtils;
 
     @PostMapping ()
-    public ResponseEntity<?> registerUser(@RequestBody SignupRequest signUpRequest)
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest)
     {
         if (userRepository.existsByMail(signUpRequest.getMail())) {
             return ResponseEntity
@@ -53,6 +53,7 @@ public class UserController {
                 signUpRequest.getMail(),
                 "default" // TODO : Change role from default
         ));
+
         return ResponseEntity.ok("User registered successfully!");
     }
 
@@ -64,13 +65,13 @@ public class UserController {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         String jwt = jwtUtils.generateJwtToken(authentication);
 
-
         return ResponseEntity.ok(new JwtResponse(
                 jwt,
                 userDetails.getUserId(),
                 userDetails.getFirstName(),
                 userDetails.getLastName(),
-                userDetails.getMail()));
+                userDetails.getMail()
+        ));
     }
 
     @GetMapping ("/{userId}")
