@@ -1,4 +1,4 @@
-INSERT INTO user (first_name, last_name, mail, password, role) VALUES
+INSERT INTO user (firstname, lastname, mail, password, role) VALUES
     ('Test', 'TEST', 'test@mail.com', '123', 'admin'),
     ('Antoine', 'DEPOISIER', 'antoine@mail.com', '123', 'admin'),
     ('Mathis', 'TANGHE', 'mathis@mail.com', '123', 'admin'),

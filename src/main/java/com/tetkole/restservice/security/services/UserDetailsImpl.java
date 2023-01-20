@@ -14,19 +14,19 @@ public class UserDetailsImpl implements UserDetails {
 
     private int userId;
 
-    private String firstName;
+    private String firstname;
 
-    private String lastName;
+    private String lastname;
 
     private String mail;
 
     @JsonIgnore
     private String password;
 
-    public UserDetailsImpl(int userId, String firstName, String lastName, String mail, String password) {
+    public UserDetailsImpl(int userId, String firstname, String lastname, String mail, String password) {
         this.userId = userId;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.firstname = firstname;
+        this.lastname = lastname;
         this.mail = mail;
         this.password = password;
     }
@@ -35,8 +35,8 @@ public class UserDetailsImpl implements UserDetails {
 
         return new UserDetailsImpl(
                 user.getUserId(),
-                user.getFirstName(),
-                user.getLastName(),
+                user.getFirstname(),
+                user.getLastname(),
                 user.getMail(),
                 user.getPassword());
     }
@@ -45,12 +45,12 @@ public class UserDetailsImpl implements UserDetails {
         return userId;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getFirstname() {
+        return firstname;
     }
 
-    public String getLastName() {
-        return lastName;
+    public String getLastname() {
+        return lastname;
     }
 
     public String getMail() {

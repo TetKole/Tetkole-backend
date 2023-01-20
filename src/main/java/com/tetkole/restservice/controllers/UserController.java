@@ -47,8 +47,8 @@ public class UserController {
         }
 
         userRepository.save(new User(
-                signUpRequest.getFirstName(),
-                signUpRequest.getLastName(),
+                signUpRequest.getFirstname(),
+                signUpRequest.getLastname(),
                 encoder.encode(signUpRequest.getPassword()),
                 signUpRequest.getMail(),
                 "default" // TODO : Change role from default
@@ -68,8 +68,8 @@ public class UserController {
         return ResponseEntity.ok(new JwtResponse(
                 jwt,
                 userDetails.getUserId(),
-                userDetails.getFirstName(),
-                userDetails.getLastName(),
+                userDetails.getFirstname(),
+                userDetails.getLastname(),
                 userDetails.getMail()
         ));
     }
