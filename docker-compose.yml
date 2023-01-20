@@ -14,4 +14,12 @@ services:
     ports:
       - 3306:3306
     environment:
-      MYSQL_ROOT_PASSWORD: example
+      MYSQL_ROOT_PASSWORD: root
+      # if you change the database name (here 'tetkole'), you also need to change it names in application.properties file in Spring project
+      MYSQL_DATABASE: tetkole
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    volumes:
+      - tetkole-database:/var/lib/mysql
+
+volumes:
+  tetkole-database:
