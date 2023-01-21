@@ -2,16 +2,17 @@ package com.tetkole.restservice.controllers;
 
 import com.tetkole.restservice.models.Corpus;
 import com.tetkole.restservice.models.Document;
-import com.tetkole.restservice.models.User;
 import com.tetkole.restservice.payload.request.CorpusCreationRequest;
 import com.tetkole.restservice.payload.request.DocumentRequest;
 import com.tetkole.restservice.repositories.CorpusRespository;
 import com.tetkole.restservice.repositories.DocumentRepository;
+import com.tetkole.restservice.utils.FileManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.File;
 import java.util.Optional;
 
 @RestController
@@ -24,23 +25,34 @@ public class CorpusController {
     @Autowired
     public DocumentRepository documentRepository;
 
+    @Autowired
+    public FileManager fileManager;
+
     @PostMapping()
     public ResponseEntity<?> addCorpus(@Valid @RequestBody CorpusCreationRequest corpusCreationRequest)
     {
+        // Check if corpus with same name already exist
         if (corpusRepository.existsByName(corpusCreationRequest.getCorpusName())) {
             return ResponseEntity
                     .badRequest()
                     .body("Error: There is already a coprus with the name : " + corpusCreationRequest.getCorpusName() +"!");
         }
 
-        //TODO créer un dossier et trouver le chemin relatif
-        String uri = corpusCreationRequest.getCorpusName();
-        //TODO créer dossiers annotations, audio, video et images
-        //TODO création de corpus_state.json
+        // créer un dossier et trouver le chemin relatif
+        String corpusName = corpusCreationRequest.getCorpusName();
+        fileManager.createCorpusFolder(corpusName);
 
-        corpusRepository.save(new Corpus(corpusCreationRequest.getCorpusName(), uri));
+        // créer dossiers annotations, audio, video et images
+        fileManager.createFolder(corpusName, "Annotations");
+        fileManager.createFolder(corpusName, "FieldAudio");
+        fileManager.createFolder(corpusName, "Images");
+        fileManager.createFolder(corpusName, "Videos");
 
-        Optional<Corpus> corpus = corpusRepository.findTopByOrderByIdDesc();
+        // création de corpus_state.json
+        File corpusStateFile = fileManager.createFile(corpusName, "corpus_state.json");
+        corpusRepository.save(new Corpus(corpusCreationRequest.getCorpusName(), corpusName));
+
+        Optional<Corpus> corpus = corpusRepository.findTopByOrderByCorpusIdDesc();
 
         return ResponseEntity.ok(corpus);
     }
@@ -48,11 +60,12 @@ public class CorpusController {
     @PostMapping("/{corpusId}/addDocument")
     public ResponseEntity<?> addDocument(@Valid @RequestBody DocumentRequest documentRequest, @PathVariable int corpusId)
     {
-        if (documentRepository.existsByNameAndCorpusId(documentRequest.getDocName(), corpusId)) {
+        if (corpusRepository.existsDocumentByName(documentRequest.getDocName())) {
             return ResponseEntity
                     .badRequest()
                     .body("Error: There is already a coprus with the name : " + documentRequest.getDocName() + " in this corpus!");
         }
+
 
         //TODO déplacer le fichier de la requete
         //TODO créer un dossier pour ce document dans annotation
@@ -62,7 +75,7 @@ public class CorpusController {
                 uri)
         );
 
-        Optional<Document> document = documentRepository.findTopByOrderByIdDesc();
+        Optional<Document> document = documentRepository.findTopByOrderByDocIdDesc();
 
         return ResponseEntity.ok(document);
     }
@@ -72,7 +85,7 @@ public class CorpusController {
             @PathVariable int corpusId,
             @PathVariable int docId)
     {
-        //TODO penser s'il serait mieux de stocker dans la BDD ou bien dans un JSON
+        //TODO refléchir s'il serait mieux de stocker dans la BDD ou bien dans un JSON
 
         return ResponseEntity.ok("Corpus created successfully!");
     }

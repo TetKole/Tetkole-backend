@@ -9,7 +9,7 @@ public class Document {
     @Column(name="doc_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Integer docId;
 
     @Column(name="type",nullable=false, length = 20)
     @Enumerated(EnumType.STRING)
@@ -20,6 +20,10 @@ public class Document {
 
     @Column(name="uri",nullable=false)
     private String uri;
+
+    @OneToOne
+    @JoinColumn(name = "corpus_id")
+    private Corpus corpus;
 
     public Document() {
     }

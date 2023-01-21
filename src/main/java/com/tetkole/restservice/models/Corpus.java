@@ -2,7 +2,7 @@ package com.tetkole.restservice.models;
 
 import jakarta.persistence.*;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,7 +22,7 @@ public class Corpus {
 
     @OneToMany
     @JoinColumn(name="corpus_id")
-    private List<Document> documents = new LinkedList<>();
+    private List<Document> documents = new ArrayList<>();
 
     public Corpus(String name, String uri) {
         this.name = name;
