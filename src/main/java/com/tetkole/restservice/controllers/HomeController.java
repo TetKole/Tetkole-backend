@@ -5,9 +5,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class HomeController {
-    @GetMapping("/")
-    public String helloWorld()
+    @GetMapping("/api")
+    public String helloApi()
     {
         return "Bienvenue sur l'API Tètkole";
+    }
+
+    @GetMapping("/")
+    public String hello()
+    {
+        return "don't fortget /api";
     }
 }

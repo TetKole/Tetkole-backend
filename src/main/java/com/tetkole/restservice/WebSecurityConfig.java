@@ -19,8 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 
 @Configuration
-@EnableGlobalMethodSecurity(
-        prePostEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig {
     @Autowired
     UserDetailsServiceImpl userDetailsService;
@@ -57,7 +56,11 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+                // allow all request on /api/user/**
+                .authorizeHttpRequests().requestMatchers("/api/user/**").permitAll()
+                // require authentication on every other requests
+                .anyRequest().authenticated();
 
         http.authenticationProvider(authenticationProvider());
 
