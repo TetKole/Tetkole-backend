@@ -29,6 +29,15 @@ public class CorpusController {
     @Autowired
     public FileManager fileManager;
 
+
+    /* -- PUSH INIT -- */
+
+    /**
+     * Première méthode à être utilisée pour PUSH INIT
+     * POST /api/corpus avec dans le body en json : {"corpusName": "nouveauCorpus"}
+     * permet de créer et préparer le dossier de ce corpus dans le file system du backend.
+     * Retourne le corpus, permettant au front de poursuivre en connaissant le corpusId.
+     */
     @PostMapping()
     public ResponseEntity<?> addCorpus(@Valid @RequestBody CorpusCreationRequest corpusCreationRequest)
     {
@@ -58,6 +67,11 @@ public class CorpusController {
         return ResponseEntity.ok(corpus);
     }
 
+    /**
+     * Deuxième méthode utilisée pour PUSH INIT
+     * /api/corpus/{corpusId}/addDocument avec dans le body en form-data les fichiers.
+     * Permet d'upload les fichiers 1 par 1 (videos/audios/images/annotations).
+     */
     @PostMapping("/{corpusId}/addDocument")
     public ResponseEntity<?> addDocument(@Valid @PathVariable Integer corpusId, @RequestParam(name = "type") EDocumentType type,
                                          @RequestParam(name = "fileName") String fileName,
@@ -97,5 +111,7 @@ public class CorpusController {
 
         return ResponseEntity.ok(document);
     }
+
+    /* -- END PUSH INIT -- */
 
 }
