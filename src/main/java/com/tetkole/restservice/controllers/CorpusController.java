@@ -2,14 +2,15 @@ package com.tetkole.restservice.controllers;
 
 import com.tetkole.restservice.models.Corpus;
 import com.tetkole.restservice.models.Document;
+import com.tetkole.restservice.models.EDocumentType;
 import com.tetkole.restservice.payload.request.CorpusCreationRequest;
-import com.tetkole.restservice.payload.request.DocumentRequest;
 import com.tetkole.restservice.repositories.CorpusRespository;
 import com.tetkole.restservice.repositories.DocumentRepository;
 import com.tetkole.restservice.utils.FileManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.File;
@@ -58,21 +59,38 @@ public class CorpusController {
     }
 
     @PostMapping("/{corpusId}/addDocument")
-    public ResponseEntity<?> addDocument(@Valid @RequestBody DocumentRequest documentRequest, @PathVariable int corpusId)
+    public ResponseEntity<?> addDocument(@Valid @PathVariable Integer corpusId, @RequestParam(name = "type") EDocumentType type,
+                                         @RequestParam(name = "fileName") String fileName,
+                                         @RequestParam(name = "file") MultipartFile file)
     {
-        if (corpusRepository.existsDocumentByName(documentRequest.getDocName())) {
+        Optional<Corpus> corpus = corpusRepository.findOneByCorpusId(corpusId);
+
+        if(corpus.isEmpty()) {
             return ResponseEntity
                     .badRequest()
-                    .body("Error: There is already a coprus with the name : " + documentRequest.getDocName() + " in this corpus!");
+                    .body("Error: There corpus doesn't exist!");
         }
 
+        if (corpusRepository.existsDocumentByName(fileName)) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Error: There is already a document with the name : " + fileName + " in this corpus!");
+        }
 
-        //TODO déplacer le fichier de la requete
-        //TODO créer un dossier pour ce document dans annotation
-        String uri = documentRequest.getDocName();
-        documentRepository.save(new Document(documentRequest.getType(),
-                documentRequest.getDocName(),
-                uri)
+        String path = corpus.get().getName() + "/" + type;
+
+        if(!fileManager.createMultipartFile(path, file)) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Server Error: The document could not be uploaded.");
+        };
+
+        fileManager.createFolder(corpusId + "/" + EDocumentType.Annotations, fileName);
+
+        documentRepository.save(new Document(type,
+                fileName,
+                path + "/" + fileName,
+                corpus.get())
         );
 
         Optional<Document> document = documentRepository.findTopByOrderByDocIdDesc();

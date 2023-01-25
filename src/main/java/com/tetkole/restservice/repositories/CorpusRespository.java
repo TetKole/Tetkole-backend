@@ -9,8 +9,8 @@ import java.util.Optional;
 @Repository
 public interface CorpusRespository extends JpaRepositoryImplementation<Corpus, Integer> {
     Boolean existsByName(String name);
-
+    Optional<Corpus> findOneByCorpusId(Integer corpusId);
+    Boolean existsByCorpusId(Integer id);
     Optional<Corpus> findTopByOrderByCorpusIdDesc();
-
     Boolean existsDocumentByName(String name);
 }

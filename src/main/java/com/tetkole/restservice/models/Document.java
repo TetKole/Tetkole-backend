@@ -28,9 +28,10 @@ public class Document {
     public Document() {
     }
 
-    public Document(EDocumentType type, String name, String uri) {
+    public Document(EDocumentType type, String name, String uri, Corpus corpus) {
         this.type = type;
         this.name = name;
         this.uri = uri;
+        this.corpus = corpus;
     }
 }
