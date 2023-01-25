@@ -17,7 +17,7 @@ import java.io.File;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/corpus")
+@RequestMapping("/api/corpus")
 public class CorpusController {
 
     @Autowired
@@ -68,7 +68,7 @@ public class CorpusController {
         if(corpus.isEmpty()) {
             return ResponseEntity
                     .badRequest()
-                    .body("Error: There corpus doesn't exist!");
+                    .body("Error: The corpus doesn't exist!");
         }
 
         if (corpusRepository.existsDocumentByName(fileName)) {
@@ -85,7 +85,7 @@ public class CorpusController {
                     .body("Server Error: The document could not be uploaded.");
         };
 
-        fileManager.createFolder(corpusId + "/" + EDocumentType.Annotations, fileName);
+        fileManager.createFolder(corpus.get().getName() + "/" + EDocumentType.Annotations, fileName);
 
         documentRepository.save(new Document(type,
                 fileName,
@@ -96,16 +96,6 @@ public class CorpusController {
         Optional<Document> document = documentRepository.findTopByOrderByDocIdDesc();
 
         return ResponseEntity.ok(document);
-    }
-
-    @PostMapping("/{corpusId}/document/{docId}/addAnnotation")
-    public ResponseEntity<?> addAnnotation(@Valid @RequestBody CorpusCreationRequest corpusCreationRequest,
-            @PathVariable int corpusId,
-            @PathVariable int docId)
-    {
-        //TODO refléchir s'il serait mieux de stocker dans la BDD ou bien dans un JSON
-
-        return ResponseEntity.ok("Corpus created successfully!");
     }
 
 }

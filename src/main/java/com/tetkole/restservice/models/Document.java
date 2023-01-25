@@ -34,4 +34,24 @@ public class Document {
         this.uri = uri;
         this.corpus = corpus;
     }
+
+    public Integer getDocId() {
+        return docId;
+    }
+
+    public EDocumentType getType() {
+        return type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public Corpus getCorpus() {
+        return corpus;
+    }
 }
