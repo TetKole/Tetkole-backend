@@ -57,10 +57,10 @@ public class WebSecurityConfig {
         http.cors().and().csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                // allow all request on /api/user/**
-                .authorizeHttpRequests().requestMatchers("/api/user/**").permitAll()
-                // require authentication on every other requests
-                .anyRequest().authenticated();
+                // require authentication on /api/corpus
+                .authorizeHttpRequests().requestMatchers("/api/corpus/**").authenticated()
+                // allow all other
+                .anyRequest().permitAll();
 
         http.authenticationProvider(authenticationProvider());
 

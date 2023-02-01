@@ -14,6 +14,6 @@ public class HomeController {
     @GetMapping("/")
     public String hello()
     {
-        return "don't fortget /api";
+        return "don't forget /api";
     }
 }
