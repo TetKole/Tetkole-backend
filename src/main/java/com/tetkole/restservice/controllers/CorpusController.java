@@ -1,7 +1,5 @@
 package com.tetkole.restservice.controllers;
 
-import com.fasterxml.jackson.databind.util.JSONPObject;
-import com.mysql.cj.xdevapi.JsonValue;
 import com.tetkole.restservice.models.Corpus;
 import com.tetkole.restservice.models.Document;
 import com.tetkole.restservice.models.EDocumentType;
@@ -12,7 +10,6 @@ import com.tetkole.restservice.utils.FileManager;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.SystemPropertyUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -99,9 +96,11 @@ public class CorpusController {
         String path = corpus.get().getName() + "/" + type;
 
         if(!fileManager.createMultipartFile(path, file)) {
+            JSONObject json = new JSONObject();
+            json.put("Server Error", "The document could not be uploaded.");
             return ResponseEntity
                     .badRequest()
-                    .body("Server Error: The document could not be uploaded.");
+                    .body(json);
         };
 
         fileManager.createFolder(corpus.get().getName() + "/" + EDocumentType.Annotations, fileName);
