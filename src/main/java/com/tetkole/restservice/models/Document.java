@@ -1,6 +1,8 @@
 package com.tetkole.restservice.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.json.JSONObject;
 
 @Entity
 @Table(name= "document")
@@ -21,7 +23,7 @@ public class Document {
     @Column(name="uri",nullable=false)
     private String uri;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "corpus_id")
     private Corpus corpus;
 
@@ -53,5 +55,18 @@ public class Document {
 
     public Corpus getCorpus() {
         return corpus;
+    }
+
+
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+
+        json.put("docId", this.docId);
+        json.put("type", this.type);
+        json.put("name", this.name);
+        json.put("uri", this.uri);
+        json.put("corpusId", this.corpus.getCorpusId());
+
+        return json;
     }
 }

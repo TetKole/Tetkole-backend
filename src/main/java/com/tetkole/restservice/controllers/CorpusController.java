@@ -1,5 +1,7 @@
 package com.tetkole.restservice.controllers;
 
+import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.mysql.cj.xdevapi.JsonValue;
 import com.tetkole.restservice.models.Corpus;
 import com.tetkole.restservice.models.Document;
 import com.tetkole.restservice.models.EDocumentType;
@@ -7,8 +9,10 @@ import com.tetkole.restservice.payload.request.CorpusCreationRequest;
 import com.tetkole.restservice.repositories.CorpusRespository;
 import com.tetkole.restservice.repositories.DocumentRepository;
 import com.tetkole.restservice.utils.FileManager;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.SystemPropertyUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -73,7 +77,8 @@ public class CorpusController {
      * Permet d'upload les fichiers 1 par 1 (videos/audios/images/annotations).
      */
     @PostMapping("/{corpusId}/addDocument")
-    public ResponseEntity<?> addDocument(@Valid @PathVariable Integer corpusId, @RequestParam(name = "type") EDocumentType type,
+    public ResponseEntity<?> addDocument(@Valid @PathVariable Integer corpusId,
+                                         @RequestParam(name = "type") EDocumentType type,
                                          @RequestParam(name = "fileName") String fileName,
                                          @RequestParam(name = "file") MultipartFile file)
     {
@@ -109,7 +114,7 @@ public class CorpusController {
 
         Optional<Document> document = documentRepository.findTopByOrderByDocIdDesc();
 
-        return ResponseEntity.ok(document);
+        return ResponseEntity.ok(document.get().toJson().toString());
     }
 
     /* -- END PUSH INIT -- */

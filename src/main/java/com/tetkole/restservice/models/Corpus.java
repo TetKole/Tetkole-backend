@@ -20,7 +20,7 @@ public class Corpus {
     @Column(name="uri", nullable=false)
     private String uri;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name="corpus_id")
     private List<Document> documents = new ArrayList<>();
 
