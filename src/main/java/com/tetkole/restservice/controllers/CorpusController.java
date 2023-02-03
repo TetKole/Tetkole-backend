@@ -95,12 +95,13 @@ public class CorpusController {
 
         String path = corpus.get().getName() + "/" + type;
 
+        System.out.println(path);
+
         if(!fileManager.createMultipartFile(path, file)) {
+            System.out.println("aled");
             JSONObject json = new JSONObject();
             json.put("Server Error", "The document could not be uploaded.");
-            return ResponseEntity
-                    .badRequest()
-                    .body(json);
+            return ResponseEntity.badRequest().body(json);
         };
 
         fileManager.createFolder(corpus.get().getName() + "/" + EDocumentType.Annotations, fileName);
