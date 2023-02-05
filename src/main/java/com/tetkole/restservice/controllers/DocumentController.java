@@ -1,17 +1,15 @@
 package com.tetkole.restservice.controllers;
 
-import com.tetkole.restservice.models.Corpus;
 import com.tetkole.restservice.models.Document;
 import com.tetkole.restservice.models.EDocumentType;
-import com.tetkole.restservice.payload.request.CorpusCreationRequest;
 import com.tetkole.restservice.repositories.DocumentRepository;
 import com.tetkole.restservice.utils.FileManager;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
 import java.util.Optional;
 
 @RestController
@@ -24,38 +22,52 @@ public class DocumentController {
     @Autowired
     public FileManager fileManager;
 
-    @PostMapping("/{docId}/addAnnotation")
-    public ResponseEntity<?> addAnnotation(@Valid @PathVariable int docId,
-                                           @RequestParam(name = "file") MultipartFile file,
-                                           @RequestParam(name = "json") MultipartFile json)
+    @PostMapping("/addAnnotation")
+    public ResponseEntity<?> addAnnotation(@RequestParam(name = "documentName") String documentName,
+                                           @RequestParam(name = "audioFile") MultipartFile audioFile,
+                                           @RequestParam(name = "jsonFile") MultipartFile jsonFile)
     {
-        Optional<Document> document = documentRepository.findOneByDocId(docId);
+        JSONObject jsonError = new JSONObject();
+
+        Optional<Document> document = documentRepository.findOneByName(documentName);
+
         if(document.isEmpty()) {
+            jsonError.put("Error", "The document doesn't exist");
             return ResponseEntity
                     .badRequest()
-                    .body("Error: The document doesn't exist!");
+                    .body(jsonError.toString());
         }
 
-        String path = document.get().getCorpus().getName() + "/" + EDocumentType.Annotations + "/"
-                + document.get().getName();
+        String folderPath = document.get().getCorpus().getName() + "/" + EDocumentType.Annotations + "/" + documentName;
+        System.out.println(folderPath);
 
-        fileManager.createFolder(path, file.getOriginalFilename());
+        fileManager.createFolder(folderPath, audioFile.getOriginalFilename());
 
-        path = path + "/" + file.getOriginalFilename();
+        String path = folderPath + "/" + audioFile.getOriginalFilename();
         System.out.println(path);
 
-        if(!fileManager.createMultipartFile(path, file)) {
+        if(!fileManager.createMultipartFile(path, audioFile)) {
+            jsonError.put("Error", "The document could not be uploaded");
             return ResponseEntity
                     .badRequest()
-                    .body("Server Error: The document could not be uploaded.");
-        };
+                    .body(jsonError.toString());
+        }
 
-        if(!fileManager.createMultipartFile(path, json)) {
+        if(!fileManager.createMultipartFile(path, jsonFile)) {
+            jsonError.put("Error", "The document could not be uploaded");
             return ResponseEntity
                     .badRequest()
-                    .body("Server Error: The json could not be uploaded.");
-        };
+                    .body(jsonError.toString());
+        }
 
-        return ResponseEntity.ok("ok");
+        documentRepository.save(new Document(EDocumentType.Annotations,
+                audioFile.getOriginalFilename(),
+                path,
+                document.get().getCorpus())
+        );
+
+        Optional<Document> annotation = documentRepository.findTopByOrderByDocIdDesc();
+
+        return ResponseEntity.ok(annotation.get().toJson().toString());
     }
 }

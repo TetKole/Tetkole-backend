@@ -42,11 +42,15 @@ public class CorpusController {
     @PostMapping()
     public ResponseEntity<?> addCorpus(@Valid @RequestBody CorpusCreationRequest corpusCreationRequest)
     {
+        JSONObject jsonError = new JSONObject();
+
+
         // Check if corpus with same name already exist
         if (corpusRepository.existsByName(corpusCreationRequest.getCorpusName())) {
+            jsonError.put("Error", "The corpus already exist");
             return ResponseEntity
                     .badRequest()
-                    .body("Error: There is already a coprus with the name : " + corpusCreationRequest.getCorpusName() +"!");
+                    .body(jsonError.toString());
         }
 
         // créer un dossier et trouver le chemin relatif
@@ -79,30 +83,32 @@ public class CorpusController {
                                          @RequestParam(name = "fileName") String fileName,
                                          @RequestParam(name = "file") MultipartFile file)
     {
+        JSONObject jsonError = new JSONObject();
+
         Optional<Corpus> corpus = corpusRepository.findOneByCorpusId(corpusId);
 
         if(corpus.isEmpty()) {
+            jsonError.put("Error", "The corpus doesn't exist");
             return ResponseEntity
                     .badRequest()
-                    .body("Error: The corpus doesn't exist!");
+                    .body(jsonError.toString());
         }
 
         if (corpusRepository.existsDocumentByName(fileName)) {
+            jsonError.put("Error", "The document already exist");
             return ResponseEntity
                     .badRequest()
-                    .body("Error: There is already a document with the name : " + fileName + " in this corpus!");
+                    .body(jsonError.toString());
         }
 
         String path = corpus.get().getName() + "/" + type;
 
-        System.out.println(path);
-
         if(!fileManager.createMultipartFile(path, file)) {
-            System.out.println("aled");
-            JSONObject json = new JSONObject();
-            json.put("Server Error", "The document could not be uploaded.");
-            return ResponseEntity.badRequest().body(json);
-        };
+            jsonError.put("Error", "The document could not be uploaded");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
 
         fileManager.createFolder(corpus.get().getName() + "/" + EDocumentType.Annotations, fileName);
 
