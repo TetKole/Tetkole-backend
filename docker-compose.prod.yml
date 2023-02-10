@@ -1,0 +1,48 @@
+version: '3.1'
+
+services:
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - tetkole-prod-network
+
+  db:
+    container_name: mysqldb
+    image: mysql:5.6
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      # if you change the database name (here 'tetkole'), you also need to change it names in application-dev.properties file in Spring project
+      MYSQL_DATABASE: tetkole
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    volumes:
+      - tetkole-database:/var/lib/mysql
+    networks:
+      - tetkole-prod-network
+
+
+  api:
+    container_name: api
+    image: tetkole-backend-api-img
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    restart: always
+    networks:
+      - tetkole-prod-network
+
+
+volumes:
+  tetkole-database:
+
+
+networks:
+  tetkole-prod-network:
