@@ -1,9 +1,11 @@
 package com.tetkole.restservice.repositories;
 
 import com.tetkole.restservice.models.Corpus;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.support.JpaRepositoryImplementation;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -13,4 +15,7 @@ public interface CorpusRespository extends JpaRepositoryImplementation<Corpus, I
     Boolean existsByCorpusId(Integer id);
     Optional<Corpus> findTopByOrderByCorpusIdDesc();
     Boolean existsDocumentByName(String name);
+
+    @Query("select name from Corpus")
+    List<String> getAllCorpusName();
 }

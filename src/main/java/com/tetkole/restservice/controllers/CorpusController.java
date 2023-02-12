@@ -3,18 +3,21 @@ package com.tetkole.restservice.controllers;
 import com.tetkole.restservice.models.Corpus;
 import com.tetkole.restservice.models.Document;
 import com.tetkole.restservice.models.EDocumentType;
+import com.tetkole.restservice.models.User;
 import com.tetkole.restservice.payload.request.CorpusCreationRequest;
 import com.tetkole.restservice.repositories.CorpusRespository;
 import com.tetkole.restservice.repositories.DocumentRepository;
 import com.tetkole.restservice.utils.FileManager;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.File;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -124,5 +127,18 @@ public class CorpusController {
     }
 
     /* -- END PUSH INIT -- */
+
+    /* -- CORPUS LIST --*/
+    @GetMapping ("/list")
+    public ResponseEntity<?> getAll()
+    {
+        //Get all corpus name
+        List<String> listCorpus = corpusRepository.getAllCorpusName();
+        if(listCorpus.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(listCorpus,HttpStatus.OK);
+    }
+    /* -- END CORPUS LIST --*/
 
 }

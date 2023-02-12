@@ -86,7 +86,7 @@ public class UserController {
     }
 
     @GetMapping ()
-    public ResponseEntity<List<User>> getAll()
+    public ResponseEntity<List<User>> findAll()
     {
         List<User> listUsers = userRepository.findAll();
         if(listUsers.isEmpty()){
