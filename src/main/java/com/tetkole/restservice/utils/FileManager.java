@@ -1,13 +1,18 @@
 package com.tetkole.restservice.utils;
 
+import com.tetkole.restservice.models.Corpus;
+import com.tetkole.restservice.models.Document;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.print.Doc;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
@@ -15,6 +20,7 @@ public class FileManager {
 
     private final String resourcesDir = "Tetkole-backend-resources";
     private final String path;
+    private final String CORPUS_STATE = "corpus_state.json";
 
 
     public FileManager() {
@@ -84,5 +90,25 @@ public class FileManager {
             System.err.println("Could not create " + file.getOriginalFilename());
             return false;
         }
+    }
+
+    public File getCorpusState(String corpusName) {
+        File corpus_state = new File(path + "/" + corpusName + "/" + CORPUS_STATE);
+        if(corpus_state.exists()) return corpus_state;
+        return null;
+    }
+
+    public void createCorpusState(Corpus corpus) {
+        File corpus_state = createFile(corpus.getName(),CORPUS_STATE);
+        JSONObject corpus_content = new JSONObject(corpus);
+        // TODO corpus_content dans corpus_state
+    }
+
+    public void addDocumentInCorpusState(String corpusName, Document doc) {
+        // TODO ajouter document dans un corpus
+    }
+
+    public void addAnnotationInCorpusState(String corpusName, Document doc) {
+        // TODO ajouter annotation dans un document
     }
 }

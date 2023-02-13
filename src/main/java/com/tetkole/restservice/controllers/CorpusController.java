@@ -47,7 +47,6 @@ public class CorpusController {
     {
         JSONObject jsonError = new JSONObject();
 
-
         // Check if corpus with same name already exist
         if (corpusRepository.existsByName(corpusCreationRequest.getCorpusName())) {
             jsonError.put("Error", "The corpus already exist");
@@ -66,11 +65,12 @@ public class CorpusController {
         fileManager.createFolder(corpusName, "Images");
         fileManager.createFolder(corpusName, "Videos");
 
-        // création de corpus_state.json
-        File corpusStateFile = fileManager.createFile(corpusName, "corpus_state.json");
         corpusRepository.save(new Corpus(corpusCreationRequest.getCorpusName(), corpusName));
 
         Optional<Corpus> corpus = corpusRepository.findTopByOrderByCorpusIdDesc();
+
+        // création de corpus_state.json
+        fileManager.createCorpusState(corpus.get());
 
         return ResponseEntity.ok(corpus);
     }
@@ -96,6 +96,7 @@ public class CorpusController {
                     .badRequest()
                     .body(jsonError.toString());
         }
+        String corpusName = corpus.get().getName();
 
         if (corpusRepository.existsDocumentByName(fileName)) {
             jsonError.put("Error", "The document already exist");
@@ -104,7 +105,7 @@ public class CorpusController {
                     .body(jsonError.toString());
         }
 
-        String path = corpus.get().getName() + "/" + type;
+        String path = corpusName + "/" + type;
 
         if(!fileManager.createMultipartFile(path, file)) {
             jsonError.put("Error", "The document could not be uploaded");
@@ -113,7 +114,7 @@ public class CorpusController {
                     .body(jsonError.toString());
         }
 
-        fileManager.createFolder(corpus.get().getName() + "/" + EDocumentType.Annotations, fileName);
+        fileManager.createFolder(corpusName + "/" + EDocumentType.Annotations, fileName);
 
         documentRepository.save(new Document(type,
                 fileName,
@@ -123,10 +124,39 @@ public class CorpusController {
 
         Optional<Document> document = documentRepository.findTopByOrderByDocIdDesc();
 
+        // Fill the corpus_state
+        File corpus_state = fileManager.getCorpusState(corpusName);
+
         return ResponseEntity.ok(document.get().toJson().toString());
     }
 
     /* -- END PUSH INIT -- */
+
+    /* -- CORPUS CLONE --*/
+
+    @GetMapping("/clone/{id}")
+    public ResponseEntity<?> getCorpusState(@Valid @PathVariable Integer id)
+    {
+        JSONObject jsonError = new JSONObject();
+
+        Optional<Corpus> corpus = corpusRepository.findOneByCorpusId(id);
+        if(corpus.isEmpty()) {
+            jsonError.put("Error", "The corpus doesn't exist");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        File corpus_state = fileManager.getCorpusState(corpus.get().getName());
+        if (corpus_state == null){
+            jsonError.put("Error", "The corpus already exist");
+            return ResponseEntity.badRequest().body(jsonError);
+        }
+
+        return ResponseEntity.ok(corpus_state.toString());
+    }
+
+    /* -- END CLONE -- */
 
     /* -- CORPUS LIST --*/
     @GetMapping ("/list")
