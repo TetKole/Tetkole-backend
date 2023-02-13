@@ -4,5 +4,4 @@ public enum EDocumentType {
     FieldAudio,
     Videos,
     Images,
-    Annotations
 }

@@ -3,9 +3,8 @@ package com.tetkole.restservice.controllers;
 import com.tetkole.restservice.models.Corpus;
 import com.tetkole.restservice.models.Document;
 import com.tetkole.restservice.models.EDocumentType;
-import com.tetkole.restservice.models.User;
 import com.tetkole.restservice.payload.request.CorpusCreationRequest;
-import com.tetkole.restservice.repositories.CorpusRespository;
+import com.tetkole.restservice.repositories.CorpusRepository;
 import com.tetkole.restservice.repositories.DocumentRepository;
 import com.tetkole.restservice.utils.FileManager;
 import org.json.JSONObject;
@@ -25,7 +24,7 @@ import java.util.Optional;
 public class CorpusController {
 
     @Autowired
-    public CorpusRespository corpusRepository;
+    public CorpusRepository corpusRepository;
 
     @Autowired
     public DocumentRepository documentRepository;
@@ -72,8 +71,6 @@ public class CorpusController {
         // création de corpus_state.json
         fileManager.createCorpusState(corpus.get());
 
-        fileManager.addDocumentInCorpusState(corpusName);
-
         return ResponseEntity.ok(corpus);
     }
 
@@ -116,14 +113,14 @@ public class CorpusController {
                     .body(jsonError.toString());
         }
 
-        fileManager.createFolder(corpusName + "/" + EDocumentType.Annotations, fileName);
+        fileManager.createFolder(corpusName + "/Annotations", fileName);
 
         documentRepository.save( new Document( type, fileName, corpus.get() ) );
 
         Optional<Document> document = documentRepository.findTopByOrderByDocIdDesc();
 
         // Fill the corpus_state
-        File corpus_state = fileManager.getCorpusState(corpusName);
+        fileManager.addDocumentInCorpusState(document.get());
 
         return ResponseEntity.ok(document.get().toJson().toString());
     }
@@ -151,7 +148,9 @@ public class CorpusController {
             return ResponseEntity.badRequest().body(jsonError);
         }
 
-        return ResponseEntity.ok(corpus_state.toString());
+        JSONObject response = new JSONObject(corpus_state);
+
+        return ResponseEntity.ok(response);
     }
 
     /* -- END CLONE -- */

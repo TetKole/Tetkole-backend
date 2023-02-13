@@ -17,8 +17,7 @@ public class Corpus {
     @Column(name="name", nullable=false)
     private String name;
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name="corpus_id")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "corpus")
     private List<Document> documents = new ArrayList<>();
 
     public Corpus(String name) {

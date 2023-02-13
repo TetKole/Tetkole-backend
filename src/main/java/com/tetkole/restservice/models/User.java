@@ -2,6 +2,9 @@ package com.tetkole.restservice.models;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name= "user")
 public class User {

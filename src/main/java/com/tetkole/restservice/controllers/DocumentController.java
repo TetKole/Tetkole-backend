@@ -1,8 +1,12 @@
 package com.tetkole.restservice.controllers;
 
+import com.tetkole.restservice.models.Annotation;
 import com.tetkole.restservice.models.Document;
 import com.tetkole.restservice.models.EDocumentType;
+import com.tetkole.restservice.models.User;
+import com.tetkole.restservice.repositories.AnnotationRepository;
 import com.tetkole.restservice.repositories.DocumentRepository;
+import com.tetkole.restservice.repositories.UserRepository;
 import com.tetkole.restservice.utils.FileManager;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +24,22 @@ public class DocumentController {
     public DocumentRepository documentRepository;
 
     @Autowired
+    public AnnotationRepository annotationRepository;
+
+    @Autowired
+    public UserRepository userRepository;
+
+    @Autowired
     public FileManager fileManager;
 
     @PostMapping("/addAnnotation")
     public ResponseEntity<?> addAnnotation(@RequestParam(name = "documentName") String documentName,
+                                           @RequestParam(name = "userId") int userId,
                                            @RequestParam(name = "audioFile") MultipartFile audioFile,
                                            @RequestParam(name = "jsonFile") MultipartFile jsonFile)
     {
+        //TODO tester la methode et ajouter id user dans la requête front
+
         JSONObject jsonError = new JSONObject();
 
         Optional<Document> document = documentRepository.findOneByName(documentName);
@@ -38,7 +51,7 @@ public class DocumentController {
                     .body(jsonError.toString());
         }
 
-        String folderPath = document.get().getCorpus().getName() + "/" + EDocumentType.Annotations + "/" + documentName;
+        String folderPath = document.get().getCorpus().getName() + "/Annotations/" + documentName;
         System.out.println(folderPath);
 
         fileManager.createFolder(folderPath, audioFile.getOriginalFilename());
@@ -60,13 +73,31 @@ public class DocumentController {
                     .body(jsonError.toString());
         }
 
-        documentRepository.save( new Document(
-                EDocumentType.Annotations,
+        Optional<User> user = userRepository.findById(userId);
+        if(user.isEmpty()) {
+            jsonError.put("Error", "The user doesn't exists");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        if(annotationRepository.existsByNameAndDocId(audioFile.getOriginalFilename(), document.get().getDocId())) {
+            jsonError.put("Error", "The annotation already exists");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        annotationRepository.save( new Annotation(
                 audioFile.getOriginalFilename(),
-                document.get().getCorpus())
+                user.get(),
+                document.get())
         );
 
-        Optional<Document> annotation = documentRepository.findTopByOrderByDocIdDesc();
+        Optional<Annotation> annotation = annotationRepository.findTopByOrderByAnnotationIdDesc();
+
+        // Fill the corpus_state
+        fileManager.addAnnotationInCorpusState(annotation.get());
 
         return ResponseEntity.ok(annotation.get().toJson().toString());
     }
