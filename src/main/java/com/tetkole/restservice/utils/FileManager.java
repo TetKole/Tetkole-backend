@@ -3,7 +3,6 @@ package com.tetkole.restservice.utils;
 import com.tetkole.restservice.models.Corpus;
 import com.tetkole.restservice.models.Document;
 import org.json.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
