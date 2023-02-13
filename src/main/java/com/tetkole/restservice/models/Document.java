@@ -20,9 +20,6 @@ public class Document {
     @Column(name="name",nullable=false)
     private String name;
 
-    @Column(name="uri",nullable=false)
-    private String uri;
-
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "corpus_id")
     private Corpus corpus;
@@ -30,10 +27,9 @@ public class Document {
     public Document() {
     }
 
-    public Document(EDocumentType type, String name, String uri, Corpus corpus) {
+    public Document(EDocumentType type, String name, Corpus corpus) {
         this.type = type;
         this.name = name;
-        this.uri = uri;
         this.corpus = corpus;
     }
 
@@ -49,10 +45,6 @@ public class Document {
         return name;
     }
 
-    public String getUri() {
-        return uri;
-    }
-
     public Corpus getCorpus() {
         return corpus;
     }
@@ -64,7 +56,6 @@ public class Document {
         json.put("docId", this.docId);
         json.put("type", this.type);
         json.put("name", this.name);
-        json.put("uri", this.uri);
         json.put("corpusId", this.corpus.getCorpusId());
 
         return json;

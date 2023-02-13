@@ -17,16 +17,12 @@ public class Corpus {
     @Column(name="name", nullable=false)
     private String name;
 
-    @Column(name="uri", nullable=false)
-    private String uri;
-
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name="corpus_id")
     private List<Document> documents = new ArrayList<>();
 
-    public Corpus(String name, String uri) {
+    public Corpus(String name) {
         this.name = name;
-        this.uri = uri;
     }
 
     public Corpus() {
@@ -39,10 +35,6 @@ public class Corpus {
 
     public String getName() {
         return name;
-    }
-
-    public String getUri() {
-        return uri;
     }
 
     public List<Document> getDocuments() {

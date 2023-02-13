@@ -65,12 +65,14 @@ public class CorpusController {
         fileManager.createFolder(corpusName, "Images");
         fileManager.createFolder(corpusName, "Videos");
 
-        corpusRepository.save(new Corpus(corpusCreationRequest.getCorpusName(), corpusName));
+        corpusRepository.save(new Corpus(corpusName));
 
         Optional<Corpus> corpus = corpusRepository.findTopByOrderByCorpusIdDesc();
 
         // création de corpus_state.json
         fileManager.createCorpusState(corpus.get());
+
+        fileManager.addDocumentInCorpusState(corpusName);
 
         return ResponseEntity.ok(corpus);
     }
@@ -116,11 +118,7 @@ public class CorpusController {
 
         fileManager.createFolder(corpusName + "/" + EDocumentType.Annotations, fileName);
 
-        documentRepository.save(new Document(type,
-                fileName,
-                path + "/" + fileName,
-                corpus.get())
-        );
+        documentRepository.save( new Document( type, fileName, corpus.get() ) );
 
         Optional<Document> document = documentRepository.findTopByOrderByDocIdDesc();
 

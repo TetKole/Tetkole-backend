@@ -60,9 +60,9 @@ public class DocumentController {
                     .body(jsonError.toString());
         }
 
-        documentRepository.save(new Document(EDocumentType.Annotations,
+        documentRepository.save( new Document(
+                EDocumentType.Annotations,
                 audioFile.getOriginalFilename(),
-                path,
                 document.get().getCorpus())
         );
 

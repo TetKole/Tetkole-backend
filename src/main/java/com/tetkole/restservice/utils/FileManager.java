@@ -3,16 +3,14 @@ package com.tetkole.restservice.utils;
 import com.tetkole.restservice.models.Corpus;
 import com.tetkole.restservice.models.Document;
 import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.print.Doc;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
@@ -101,11 +99,33 @@ public class FileManager {
     public void createCorpusState(Corpus corpus) {
         File corpus_state = createFile(corpus.getName(),CORPUS_STATE);
         JSONObject corpus_content = new JSONObject(corpus);
-        // TODO corpus_content dans corpus_state
+        try {
+            FileWriter fileWriter = new FileWriter(corpus_state.getPath());
+            fileWriter.flush();
+            fileWriter.write(corpus_content.toString());
+            fileWriter.close();
+        } catch (Exception IOException) {
+            System.err.println("Could not write in " + corpus_state.getName());
+        }
     }
 
-    public void addDocumentInCorpusState(String corpusName, Document doc) {
-        // TODO ajouter document dans un corpus
+    public void addDocumentInCorpusState(String corpusName) {
+        File corpus_state = new File(path + "/" + corpusName + "/" + CORPUS_STATE);
+        JSONObject corpus_content;
+        try {
+            FileInputStream fis = new FileInputStream(corpus_state);
+            byte[] data = new byte[(int) corpus_state.length()];
+            fis.read(data);
+            fis.close();
+
+            String str = new String(data, "UTF-8");
+            System.out.println(str);
+
+        } catch (Exception IOException) {
+            System.err.println("Could not read in " + corpus_state.getName());
+        }
+
+
     }
 
     public void addAnnotationInCorpusState(String corpusName, Document doc) {
