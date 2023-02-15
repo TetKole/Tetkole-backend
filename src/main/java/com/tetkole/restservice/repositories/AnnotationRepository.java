@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface AnnotationRepository extends JpaRepositoryImplementation<Annotation, Integer> {
     Optional<Annotation> findTopByOrderByAnnotationIdDesc();
     Optional<Annotation> findOneByAnnotationId(Integer annotationId);
-    Boolean existsByNameAndDocId(String name, Integer docId);
+    Boolean existsByNameAndDocument(String name, Document doc);
 }

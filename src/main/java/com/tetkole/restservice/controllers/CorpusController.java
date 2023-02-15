@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,7 +81,6 @@ public class CorpusController {
     @PostMapping("/{corpusId}/addDocument")
     public ResponseEntity<?> addDocument(@Valid @PathVariable Integer corpusId,
                                          @RequestParam(name = "type") EDocumentType type,
-                                         @RequestParam(name = "fileName") String fileName,
                                          @RequestParam(name = "file") MultipartFile file)
     {
         JSONObject jsonError = new JSONObject();
@@ -97,7 +95,7 @@ public class CorpusController {
         }
         String corpusName = corpus.get().getName();
 
-        if (corpusRepository.existsDocumentByName(fileName)) {
+        if (corpusRepository.existsDocumentByName(file.getOriginalFilename())) {
             jsonError.put("Error", "The document already exist");
             return ResponseEntity
                     .badRequest()
@@ -113,9 +111,9 @@ public class CorpusController {
                     .body(jsonError.toString());
         }
 
-        fileManager.createFolder(corpusName + "/Annotations", fileName);
+        fileManager.createFolder(corpusName + "/Annotations", file.getOriginalFilename());
 
-        documentRepository.save( new Document( type, fileName, corpus.get() ) );
+        documentRepository.save( new Document( type, file.getOriginalFilename(), corpus.get() ) );
 
         Optional<Document> document = documentRepository.findTopByOrderByDocIdDesc();
 
@@ -142,15 +140,17 @@ public class CorpusController {
                     .body(jsonError.toString());
         }
 
-        File corpus_state = fileManager.getCorpusState(corpus.get().getName());
+        JSONObject corpus_state = fileManager.getCorpusStateContent(corpus.get().getName());
         if (corpus_state == null){
-            jsonError.put("Error", "The corpus already exist");
-            return ResponseEntity.badRequest().body(jsonError);
+            jsonError.put("Error", "Corpus state not found");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
         }
 
-        JSONObject response = new JSONObject(corpus_state);
+        System.out.println(corpus_state);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(corpus_state.toString());
     }
 
     /* -- END CLONE -- */

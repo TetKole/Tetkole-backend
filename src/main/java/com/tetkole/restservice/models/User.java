@@ -25,8 +25,7 @@ public class User {
     @Column(name = "role", nullable=false)
     private String role;
 
-    public User() {
-    }
+    public User() { }
 
     public User(String firstname, String lastname, String password, String mail, String role) {
         this.firstname = firstname;

@@ -30,6 +30,8 @@ public class Annotation {
         this.document = document;
     }
 
+    public Annotation() { }
+
     public Integer getAnnotationId() {
         return annotationId;
     }

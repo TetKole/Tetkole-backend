@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.util.Optional;
 
 @RestController
@@ -32,8 +33,8 @@ public class DocumentController {
     @Autowired
     public FileManager fileManager;
 
-    @PostMapping("/addAnnotation")
-    public ResponseEntity<?> addAnnotation(@RequestParam(name = "documentName") String documentName,
+    @PostMapping("{docID}/addAnnotation")
+    public ResponseEntity<?> addAnnotation(@Valid @PathVariable Integer docID,
                                            @RequestParam(name = "userId") int userId,
                                            @RequestParam(name = "audioFile") MultipartFile audioFile,
                                            @RequestParam(name = "jsonFile") MultipartFile jsonFile)
@@ -42,7 +43,7 @@ public class DocumentController {
 
         JSONObject jsonError = new JSONObject();
 
-        Optional<Document> document = documentRepository.findOneByName(documentName);
+        Optional<Document> document = documentRepository.findOneByDocId(docID);
 
         if(document.isEmpty()) {
             jsonError.put("Error", "The document doesn't exist");
@@ -51,7 +52,7 @@ public class DocumentController {
                     .body(jsonError.toString());
         }
 
-        String folderPath = document.get().getCorpus().getName() + "/Annotations/" + documentName;
+        String folderPath = document.get().getCorpus().getName() + "/Annotations/" + document.get().getName();
         System.out.println(folderPath);
 
         fileManager.createFolder(folderPath, audioFile.getOriginalFilename());
@@ -81,7 +82,7 @@ public class DocumentController {
                     .body(jsonError.toString());
         }
 
-        if(annotationRepository.existsByNameAndDocId(audioFile.getOriginalFilename(), document.get().getDocId())) {
+        if(annotationRepository.existsByNameAndDocument(audioFile.getOriginalFilename(), document.get())) {
             jsonError.put("Error", "The annotation already exists");
             return ResponseEntity
                     .badRequest()

@@ -31,8 +31,7 @@ public class Document {
     @JoinColumn(name = "corpus_id")
     private Corpus corpus;
 
-    public Document() {
-    }
+    public Document() { }
 
     public Document(EDocumentType type, String name, Corpus corpus) {
         this.type = type;

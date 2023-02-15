@@ -24,9 +24,7 @@ public class Corpus {
         this.name = name;
     }
 
-    public Corpus() {
-
-    }
+    public Corpus() { }
 
     public Integer getCorpusId() {
         return corpusId;

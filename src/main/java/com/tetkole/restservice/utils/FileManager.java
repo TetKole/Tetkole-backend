@@ -92,108 +92,86 @@ public class FileManager {
         }
     }
 
-    public File getCorpusState(String corpusName) {
+    public JSONObject getCorpusStateContent(String corpusName) {
         File corpus_state = new File(path + "/" + corpusName + "/" + CORPUS_STATE);
-        if(corpus_state.exists()) return corpus_state;
+        if(corpus_state.exists()) {
+            return readJSONFile(corpus_state);
+        }
         return null;
     }
 
     public void createCorpusState(Corpus corpus) {
         File corpus_state = createFile(corpus.getName(),CORPUS_STATE);
         JSONObject corpus_content = new JSONObject(corpus);
-
-        try {
-
-            // Write in corpus_state file
-            FileOutputStream fos = new FileOutputStream(corpus_state);
-            byte[] data = corpus_content.toString().getBytes(StandardCharsets.UTF_8);
-            fos.write(data);
-            fos.close();
-
-        } catch (Exception IOException) {
-            System.err.println("Could not write in " + corpus_state.getName());
-        }
+        writeJSONFile(corpus_state, corpus_content);
     }
 
     public void addDocumentInCorpusState(Document doc) {
         File corpus_state = new File(path + "/" + doc.getCorpus().getName() + "/" + CORPUS_STATE);
-        JSONObject corpus_content;
+        JSONObject corpus_content = readJSONFile(corpus_state);
 
-        try {
+        if(corpus_content == null) return;
 
-            // Read in corpus_state file
-            FileInputStream fis = new FileInputStream(corpus_state);
-            byte[] data = new byte[(int) corpus_state.length()];
-            fis.read(data);
-            fis.close();
+        JSONArray documents = corpus_content.getJSONArray("documents");
+        JSONObject json_doc = doc.toJson();
+        json_doc.remove("corpusId");
+        documents.put(json_doc);
+        corpus_content.put("documents", documents);
 
-            String str = new String(data, StandardCharsets.UTF_8);
-            corpus_content = new JSONObject(str);
-            JSONArray documents = corpus_content.getJSONArray("documents");
-            JSONObject json_doc = doc.toJson();
-            doc.toJson().remove("corpusId");
-            documents.put(json_doc);
-            corpus_content.put("documents", documents);
-
-            try {
-
-                // Write in corpus_state file
-                FileOutputStream fos = new FileOutputStream(corpus_state);
-                data = corpus_content.toString().getBytes(StandardCharsets.UTF_8);
-                fos.flush();
-                fos.write(data);
-                fos.close();
-
-            } catch (Exception IOException) {
-                System.err.println("Could not write in " + corpus_state.getName());
-            }
-        } catch (Exception IOException) {
-            System.err.println("Could not read in " + corpus_state.getName());
-        }
+        writeJSONFile(corpus_state, corpus_content);
     }
 
     public void addAnnotationInCorpusState(Annotation annotation) {
+
         File corpus_state = new File(path + "/" + annotation.getDocument().getCorpus().getName() + "/" + CORPUS_STATE);
-        JSONObject corpus_content;
 
+        JSONObject corpus_content = readJSONFile(corpus_state);
+        if(corpus_content == null) return;
+
+        JSONArray documents = corpus_content.getJSONArray("documents");
+
+        for (int i = 0; i < documents.length(); i++) {
+            JSONObject document_json = documents.getJSONObject(i);
+            if(document_json.get("docId").equals(annotation.getDocument().getDocId())) {
+                JSONArray annotations = document_json.getJSONArray("annotations");
+                annotations.put(annotation.toJson());
+                document_json.put("annotations",annotations);
+                documents.put(i, document_json);
+                corpus_content.put("documents",documents);
+                break;
+            }
+        }
+
+        writeJSONFile(corpus_state, corpus_content);
+    }
+
+    private JSONObject readJSONFile(File jsonFile) {
+        JSONObject corpus_content = null;
         try {
-
-            // Read in corpus_state file
-            FileInputStream fis = new FileInputStream(corpus_state);
-            byte[] data = new byte[(int) corpus_state.length()];
+            // Read corpus_state file
+            FileInputStream fis = new FileInputStream(jsonFile);
+            byte[] data = new byte[(int) jsonFile.length()];
             fis.read(data);
             fis.close();
 
             String str = new String(data, StandardCharsets.UTF_8);
             corpus_content = new JSONObject(str);
-            JSONArray documents = corpus_content.getJSONArray("documents");
-
-            for (int i = 0; i < documents.length(); i++) {
-                JSONObject document_json = documents.getJSONObject(i);
-                if(document_json.get("docId").equals(annotation.getDocument().getDocId())) {
-                    JSONArray annotations = document_json.getJSONArray("annotations");
-                    annotations.put(annotation.toJson());
-                    document_json.put("annotations",annotations);
-                    documents.put(i, document_json);
-                    corpus_content.put("documents",documents);
-                    break;
-                }
-            }
-
-            try {
-
-                // Write in corpus_state file
-                FileOutputStream fos = new FileOutputStream(corpus_state);
-                data = corpus_content.toString().getBytes(StandardCharsets.UTF_8);
-                fos.flush();
-                fos.write(data);
-                fos.close();
-
-            } catch (Exception IOException) {
-                System.err.println("Could not write in " + corpus_state.getName());
-            }
         } catch (Exception IOException) {
-            System.err.println("Could not read in " + corpus_state.getName());
+            System.err.println("Could not read in " + jsonFile.getName());
+        }
+        return corpus_content;
+    }
+
+    private void writeJSONFile(File jsonFile, JSONObject jsonContent) {
+        try {
+            // Write in corpus_state file
+            FileOutputStream fos = new FileOutputStream(jsonFile);
+            byte[] data = jsonContent.toString().getBytes(StandardCharsets.UTF_8);
+            fos.flush();
+            fos.write(data);
+            fos.close();
+        } catch (Exception IOException) {
+            System.err.println("Could not write in " + jsonFile.getName());
         }
     }
 }

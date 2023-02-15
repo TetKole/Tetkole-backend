@@ -10,5 +10,4 @@ import java.util.Optional;
 public interface DocumentRepository extends JpaRepositoryImplementation<Document, Integer> {
     Optional<Document> findTopByOrderByDocIdDesc();
     Optional<Document> findOneByDocId(Integer docId);
-    Optional<Document> findOneByName(String docName);
 }
