@@ -127,7 +127,7 @@ public class CorpusController {
 
     /* -- CORPUS CLONE --*/
 
-    @GetMapping("/clone/{id}")
+    @GetMapping("/{id}/clone")
     public ResponseEntity<?> getCorpusState(@Valid @PathVariable Integer id)
     {
         JSONObject jsonError = new JSONObject();
