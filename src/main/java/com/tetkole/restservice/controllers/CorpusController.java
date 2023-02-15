@@ -7,6 +7,7 @@ import com.tetkole.restservice.payload.request.CorpusCreationRequest;
 import com.tetkole.restservice.repositories.CorpusRepository;
 import com.tetkole.restservice.repositories.DocumentRepository;
 import com.tetkole.restservice.utils.FileManager;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -160,11 +161,15 @@ public class CorpusController {
     public ResponseEntity<?> getAll()
     {
         //Get all corpus name
-        List<String> listCorpus = corpusRepository.getAllCorpusName();
+        List<Corpus> listCorpus = corpusRepository.findAll();
+        JSONArray response = new JSONArray();
+        listCorpus.forEach(corpus -> {
+            response.put(corpus.toJson());
+        });
         if(listCorpus.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(listCorpus,HttpStatus.OK);
+        return new ResponseEntity<>(response.toString(),HttpStatus.OK);
     }
     /* -- END CORPUS LIST --*/
 

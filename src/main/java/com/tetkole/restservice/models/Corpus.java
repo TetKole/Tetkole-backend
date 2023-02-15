@@ -1,6 +1,8 @@
 package com.tetkole.restservice.models;
 
 import jakarta.persistence.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,5 +38,12 @@ public class Corpus {
 
     public List<Document> getDocuments() {
         return documents;
+    }
+
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        json.put("name", this.name);
+        json.put("corpusId", this.corpusId);
+        return json;
     }
 }

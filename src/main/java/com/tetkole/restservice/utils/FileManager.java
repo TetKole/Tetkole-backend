@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -145,31 +146,24 @@ public class FileManager {
         writeJSONFile(corpus_state, corpus_content);
     }
 
-    private JSONObject readJSONFile(File jsonFile) {
-        JSONObject corpus_content = null;
+    /**
+     * Read json file's content
+     */
+    public JSONObject readJSONFile(File file) {
         try {
-            // Read corpus_state file
-            FileInputStream fis = new FileInputStream(jsonFile);
-            byte[] data = new byte[(int) jsonFile.length()];
-            fis.read(data);
-            fis.close();
-
-            String str = new String(data, StandardCharsets.UTF_8);
-            corpus_content = new JSONObject(str);
-        } catch (Exception IOException) {
-            System.err.println("Could not read in " + jsonFile.getName());
+            String data = Files.readString(Path.of(file.getPath()));
+            return new JSONObject(data);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return corpus_content;
     }
 
+    /**
+     * Write content in json file
+     */
     private void writeJSONFile(File jsonFile, JSONObject jsonContent) {
         try {
-            // Write in corpus_state file
-            FileOutputStream fos = new FileOutputStream(jsonFile);
-            byte[] data = jsonContent.toString().getBytes(StandardCharsets.UTF_8);
-            fos.flush();
-            fos.write(data);
-            fos.close();
+            Files.writeString(Path.of(jsonFile.getPath()), jsonContent.toString());
         } catch (Exception IOException) {
             System.err.println("Could not write in " + jsonFile.getName());
         }

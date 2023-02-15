@@ -15,7 +15,8 @@ public interface CorpusRepository extends JpaRepositoryImplementation<Corpus, In
     Boolean existsByCorpusId(Integer id);
     Optional<Corpus> findTopByOrderByCorpusIdDesc();
     Boolean existsDocumentByName(String name);
+    List<Corpus> findAll();
 
-    @Query("select name from Corpus")
-    List<String> getAllCorpusName();
+    @Query("select name, corpusId from Corpus")
+    List<Object> getAllCorpusName();
 }
