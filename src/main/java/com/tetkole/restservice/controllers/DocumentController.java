@@ -39,8 +39,6 @@ public class DocumentController {
                                            @RequestParam(name = "audioFile") MultipartFile audioFile,
                                            @RequestParam(name = "jsonFile") MultipartFile jsonFile)
     {
-        //TODO tester la methode et ajouter id user dans la requête front
-
         JSONObject jsonError = new JSONObject();
 
         Optional<Document> document = documentRepository.findOneByDocId(docID);
@@ -53,12 +51,10 @@ public class DocumentController {
         }
 
         String folderPath = document.get().getCorpus().getName() + "/Annotations/" + document.get().getName();
-        System.out.println(folderPath);
 
         fileManager.createFolder(folderPath, audioFile.getOriginalFilename());
 
         String path = folderPath + "/" + audioFile.getOriginalFilename();
-        System.out.println(path);
 
         if(!fileManager.createMultipartFile(path, audioFile)) {
             jsonError.put("Error", "The document could not be uploaded");

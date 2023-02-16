@@ -149,8 +149,6 @@ public class CorpusController {
                     .body(jsonError.toString());
         }
 
-        System.out.println(corpus_state);
-
         return ResponseEntity.ok(corpus_state.toString());
     }
 

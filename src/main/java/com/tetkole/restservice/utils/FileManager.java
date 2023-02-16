@@ -163,7 +163,12 @@ public class FileManager {
      */
     private void writeJSONFile(File jsonFile, JSONObject jsonContent) {
         try {
-            Files.writeString(Path.of(jsonFile.getPath()), jsonContent.toString());
+            // Write in corpus_state file
+            FileOutputStream fos = new FileOutputStream(jsonFile);
+            byte[] data = jsonContent.toString().getBytes(StandardCharsets.UTF_8);
+            fos.flush();
+            fos.write(data);
+            fos.close();
         } catch (Exception IOException) {
             System.err.println("Could not write in " + jsonFile.getName());
         }
