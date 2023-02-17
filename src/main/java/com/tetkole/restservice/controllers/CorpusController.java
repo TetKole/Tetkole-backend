@@ -168,23 +168,4 @@ public class CorpusController {
         return new ResponseEntity<>(response.toString(),HttpStatus.OK);
     }
     /* -- END CORPUS LIST --*/
-
-
-    /* PULL */
-
-    @GetMapping("/getByName/{name}")
-    public ResponseEntity<?> getByName(@Valid @PathVariable String name) {
-        JSONObject jsonError = new JSONObject();
-
-        Optional<Corpus> corpus = corpusRepository.findOneByName(name);
-        if(corpus.isEmpty()) {
-            jsonError.put("Error", "The corpus doesn't exist");
-            return ResponseEntity
-                    .badRequest()
-                    .body(jsonError.toString());
-        }
-
-        return ResponseEntity.ok(corpus.get().toJson().toString());
-    }
-
 }
