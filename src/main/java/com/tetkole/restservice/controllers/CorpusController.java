@@ -161,14 +161,30 @@ public class CorpusController {
         //Get all corpus name
         List<Corpus> listCorpus = corpusRepository.findAll();
         JSONArray response = new JSONArray();
-        listCorpus.forEach(corpus -> {
-            response.put(corpus.toJson());
-        });
+        listCorpus.forEach(corpus -> response.put(corpus.toJson()));
         if(listCorpus.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(response.toString(),HttpStatus.OK);
     }
     /* -- END CORPUS LIST --*/
+
+
+    /* PULL */
+
+    @GetMapping("/getByName/{name}")
+    public ResponseEntity<?> getByName(@Valid @PathVariable String name) {
+        JSONObject jsonError = new JSONObject();
+
+        Optional<Corpus> corpus = corpusRepository.findOneByName(name);
+        if(corpus.isEmpty()) {
+            jsonError.put("Error", "The corpus doesn't exist");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        return ResponseEntity.ok(corpus.get().toJson().toString());
+    }
 
 }
