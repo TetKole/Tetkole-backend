@@ -1,85 +1,77 @@
 package com.tetkole.restservice.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+@Data // lombok, getter and setter
+@Builder // lombok design partern builder
+@AllArgsConstructor // constructor with all args
+@NoArgsConstructor // constructor with no args
 @Entity
 @Table(name= "user")
-public class User {
+public class User implements UserDetails {
 
     @Column(name = "user_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int userId;
-
+    private Integer userId;
     @Column(name = "firstname", nullable=false)
     private String firstname;
     @Column(name = "lastname", nullable=false)
     private String lastname;
     @Column(name = "password", nullable=false)
     private String password;
-    @Column(name = "mail", nullable=false)
-    private String mail;
-    @Column(name = "role", nullable=false)
-    private String role;
+    @Column(name = "email", nullable=false)
+    private String email;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
-    public User() { }
 
-    public User(String firstname, String lastname, String password, String mail, String role) {
-        this.firstname = firstname;
-        this.lastname = lastname;
-        this.password = password;
-        this.mail = mail;
-        this.role = role;
+
+    @Override @JsonIgnore
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // return la liste des roles
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    @Override
+    public String getUsername() {
+        // return ce avec quoi l'utilisateur va s'authentifier
+        return email;
     }
 
-    public void setFirstName(String firstname) {
-        this.firstname = firstname;
+    @Override @JsonIgnore
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    public void setLastName(String lastname) {
-        this.lastname = lastname;
+    @Override @JsonIgnore
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    @Override @JsonIgnore
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
-    public void setMail(String mail) {
-        this.mail = mail;
+    @Override @JsonIgnore
+    public boolean isEnabled() {
+        return true;
     }
 
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public String getFirstname() {
-        return firstname;
-    }
-
-    public String getLastname() {
-        return lastname;
-    }
-
+    @Override
     public String getPassword() {
         return password;
-    }
-
-    public String getMail() {
-        return mail;
-    }
-
-    public String getRole() {
-        return role;
     }
 }

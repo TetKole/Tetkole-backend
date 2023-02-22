@@ -1,7 +1,6 @@
 package com.tetkole.restservice.models;
 
 import jakarta.persistence.*;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 @Entity
@@ -68,7 +67,7 @@ public class Annotation {
         JSONObject json = new JSONObject();
         json.put("annotationId", this.annotationId);
         json.put("name", this.name);
-        json.put("author", this.author.getMail());
+        json.put("author", this.author.getEmail());
         return json;
     }
 }
