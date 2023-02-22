@@ -7,9 +7,9 @@ import com.tetkole.restservice.payload.request.CorpusCreationRequest;
 import com.tetkole.restservice.repositories.CorpusRepository;
 import com.tetkole.restservice.repositories.DocumentRepository;
 import com.tetkole.restservice.utils.FileManager;
+import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,16 +21,12 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/corpus")
+@RequiredArgsConstructor
 public class CorpusController {
 
-    @Autowired
-    public CorpusRepository corpusRepository;
-
-    @Autowired
-    public DocumentRepository documentRepository;
-
-    @Autowired
-    public FileManager fileManager;
+    public final CorpusRepository corpusRepository;
+    public final DocumentRepository documentRepository;
+    public final FileManager fileManager;
 
 
     /* -- PUSH INIT -- */
@@ -47,7 +43,7 @@ public class CorpusController {
         JSONObject jsonError = new JSONObject();
 
         // Check if corpus with same name already exist
-        if (corpusRepository.existsByName(corpusCreationRequest.getCorpusName())) {
+        if (corpusRepository.existsByName(corpusCreationRequest.corpusName())) {
             jsonError.put("Error", "The corpus already exist");
             return ResponseEntity
                     .badRequest()
@@ -55,7 +51,7 @@ public class CorpusController {
         }
 
         // créer un dossier et trouver le chemin relatif
-        String corpusName = corpusCreationRequest.getCorpusName();
+        String corpusName = corpusCreationRequest.corpusName();
         fileManager.createCorpusFolder(corpusName);
 
         // créer dossiers annotations, audio, video et images

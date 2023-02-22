@@ -1,12 +1,13 @@
 package com.tetkole.restservice.models;
 
 import jakarta.persistence.*;
-import org.json.JSONArray;
+import lombok.Data;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
 @Entity
 @Table(name= "corpus")
 public class Corpus {
@@ -28,17 +29,6 @@ public class Corpus {
 
     public Corpus() { }
 
-    public Integer getCorpusId() {
-        return corpusId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public List<Document> getDocuments() {
-        return documents;
-    }
 
     public JSONObject toJson() {
         JSONObject json = new JSONObject();

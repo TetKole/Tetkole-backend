@@ -1,13 +1,14 @@
 package com.tetkole.restservice.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Data;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
 @Entity
 @Table(name= "document")
 public class Document {
@@ -37,22 +38,6 @@ public class Document {
         this.type = type;
         this.name = name;
         this.corpus = corpus;
-    }
-
-    public Integer getDocId() {
-        return docId;
-    }
-
-    public EDocumentType getType() {
-        return type;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Corpus getCorpus() {
-        return corpus;
     }
 
 

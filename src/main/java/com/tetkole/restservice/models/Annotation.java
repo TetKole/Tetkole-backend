@@ -1,8 +1,10 @@
 package com.tetkole.restservice.models;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import org.json.JSONObject;
 
+@Data
 @Entity
 @Table(name= "annotation")
 public class Annotation {
@@ -31,37 +33,6 @@ public class Annotation {
 
     public Annotation() { }
 
-    public Integer getAnnotationId() {
-        return annotationId;
-    }
-
-    public void setAnnotationId(Integer annotationId) {
-        this.annotationId = annotationId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public User getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(User author) {
-        this.author = author;
-    }
-
-    public Document getDocument() {
-        return document;
-    }
-
-    public void setDocument(Document document) {
-        this.document = document;
-    }
 
     public JSONObject toJson() {
         JSONObject json = new JSONObject();

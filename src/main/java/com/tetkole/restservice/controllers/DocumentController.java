@@ -2,14 +2,13 @@ package com.tetkole.restservice.controllers;
 
 import com.tetkole.restservice.models.Annotation;
 import com.tetkole.restservice.models.Document;
-import com.tetkole.restservice.models.EDocumentType;
 import com.tetkole.restservice.models.User;
 import com.tetkole.restservice.repositories.AnnotationRepository;
 import com.tetkole.restservice.repositories.DocumentRepository;
 import com.tetkole.restservice.repositories.UserRepository;
 import com.tetkole.restservice.utils.FileManager;
+import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,19 +18,13 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/document")
+@RequiredArgsConstructor
 public class DocumentController {
 
-    @Autowired
-    public DocumentRepository documentRepository;
-
-    @Autowired
-    public AnnotationRepository annotationRepository;
-
-    @Autowired
-    public UserRepository userRepository;
-
-    @Autowired
-    public FileManager fileManager;
+    public final DocumentRepository documentRepository;
+    public final AnnotationRepository annotationRepository;
+    public final UserRepository userRepository;
+    public final FileManager fileManager;
 
     @PostMapping("{docID}/addAnnotation")
     public ResponseEntity<?> addAnnotation(@Valid @PathVariable Integer docID,
