@@ -23,10 +23,10 @@ public class SecurityConfig {
         http
                 .cors().and().csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/user/**")
-                .permitAll()
-                .anyRequest()
+                .requestMatchers("/api/corpus/**")
                 .authenticated()
+                .anyRequest()
+                .permitAll()
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
