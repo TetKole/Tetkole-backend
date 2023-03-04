@@ -124,6 +124,10 @@ public class DocumentController {
         String folderPath = document.get().getCorpus().getName() + "/Annotations/" + document.get().getName() + "/" + annotation.get().getName();
         boolean success = fileManager.deleteAnnotationFromFolder(folderPath);
 
+        if (success) {
+            fileManager.deleteAnnotationInCorpusState(annotation.get());
+        }
+
         return ResponseEntity.ok(new SuccessResponse(success));
     }
 
@@ -166,6 +170,29 @@ public class DocumentController {
         String annotationPath = document.get().getCorpus().getName() + "/Annotations";
         success = fileManager.deleteFile(annotationPath, document.get().getName());
 
+        if (success) {
+            fileManager.deleteDocumentInCorpusState(document.get());
+        }
+
         return ResponseEntity.ok(new SuccessResponse(success));
+    }
+
+
+    @GetMapping("/name/{name}")
+    public ResponseEntity<?> getDocIdByName(@Valid @PathVariable String name)
+    {
+        // please be sure that the doc do not have annotation !
+        JSONObject jsonError = new JSONObject();
+
+        Optional<Document> document = documentRepository.findOneByName(name);
+
+        if(document.isEmpty()) {
+            jsonError.put("Error", "The document doesn't exist");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        return ResponseEntity.ok(document.get().getDocId());
     }
 }

@@ -151,6 +151,61 @@ public class FileManager {
         writeJSONFile(corpus_state, corpus_content);
     }
 
+    public void deleteAnnotationInCorpusState(Annotation annotation) {
+        File corpus_state = new File(path + "/" + annotation.getDocument().getCorpus().getName() + "/" + CORPUS_STATE);
+
+        JSONObject corpus_content = readJSONFile(corpus_state);
+        if(corpus_content == null) return;
+
+        JSONArray documents = corpus_content.getJSONArray("documents");
+
+        boolean done = false;
+
+        for (int i = 0; i < documents.length(); i++) {
+            JSONObject document = documents.getJSONObject(i);
+            JSONArray annotations = document.getJSONArray("annotations");
+
+            for (int j = 0; j < annotations.length(); j++) {
+                JSONObject a = annotations.getJSONObject(j);
+
+                if (a.getInt("annotationId") == annotation.getAnnotationId()) {
+                    annotations.remove(j);
+                    document.put("annotations", annotations);
+                    documents.put(i, document);
+                    corpus_content.put("documents",documents);
+                    done = true;
+                    break;
+                }
+
+                if (done) break;
+            }
+        }
+
+        writeJSONFile(corpus_state, corpus_content);
+    }
+
+    public void deleteDocumentInCorpusState(Document document) {
+
+        File corpus_state = new File(path + "/" + document.getCorpus().getName() + "/" + CORPUS_STATE);
+
+        JSONObject corpus_content = readJSONFile(corpus_state);
+        if(corpus_content == null) return;
+
+        JSONArray documents = corpus_content.getJSONArray("documents");
+
+        for (int i = 0; i < documents.length(); i++) {
+            JSONObject document_json = documents.getJSONObject(i);
+
+            if(document_json.get("docId").equals(document.getDocId())) {
+                documents.remove(i);
+                corpus_content.put("documents",documents);
+                break;
+            }
+        }
+
+        writeJSONFile(corpus_state, corpus_content);
+    }
+
     /**
      * Read json file's content
      */
