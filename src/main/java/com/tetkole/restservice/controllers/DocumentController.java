@@ -3,6 +3,7 @@ package com.tetkole.restservice.controllers;
 import com.tetkole.restservice.models.Annotation;
 import com.tetkole.restservice.models.Document;
 import com.tetkole.restservice.models.User;
+import com.tetkole.restservice.payload.response.SuccessResponse;
 import com.tetkole.restservice.repositories.AnnotationRepository;
 import com.tetkole.restservice.repositories.DocumentRepository;
 import com.tetkole.restservice.repositories.UserRepository;
@@ -90,5 +91,81 @@ public class DocumentController {
         fileManager.addAnnotationInCorpusState(annotation.get());
 
         return ResponseEntity.ok(annotation.get().toJson().toString());
+    }
+
+    @DeleteMapping("{docID}/{annotationId}")
+    public ResponseEntity<?> deleteAnnotation(@Valid @PathVariable Integer docID,
+                                              @Valid @PathVariable Integer annotationId)
+    {
+        JSONObject jsonError = new JSONObject();
+
+        Optional<Document> document = documentRepository.findOneByDocId(docID);
+
+        if(document.isEmpty()) {
+            jsonError.put("Error", "The document doesn't exist");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+
+        Optional<Annotation> annotation = annotationRepository.findById(annotationId);
+        if (annotation.isEmpty()) {
+            jsonError.put("Error", "The annotation doesn't exist");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        // delete from database
+        annotationRepository.deleteById(annotationId);
+
+        // delete from file system
+        String folderPath = document.get().getCorpus().getName() + "/Annotations/" + document.get().getName() + "/" + annotation.get().getName();
+        boolean success = fileManager.deleteAnnotationFromFolder(folderPath);
+
+        return ResponseEntity.ok(new SuccessResponse(success));
+    }
+
+    @DeleteMapping("{docID}")
+    public ResponseEntity<?> deleteDocument(@Valid @PathVariable Integer docID)
+    {
+        // please be sure that the doc do not have annotation !
+        JSONObject jsonError = new JSONObject();
+
+        Optional<Document> document = documentRepository.findOneByDocId(docID);
+
+        if(document.isEmpty()) {
+            jsonError.put("Error", "The document doesn't exist");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        if (document.get().getAnnotations().size() != 0) {
+            jsonError.put("Error", "The document has annotations");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        // delete from database
+        documentRepository.deleteById(docID);
+
+        // delete from file system
+        String docPath = document.get().getCorpus().getName() + "/" + document.get().getType();
+        boolean success = fileManager.deleteFile(docPath, document.get().getName());
+
+        if (!success) {
+            jsonError.put("Error", "Couldn't delete document");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        String annotationPath = document.get().getCorpus().getName() + "/Annotations";
+        success = fileManager.deleteFile(annotationPath, document.get().getName());
+
+        return ResponseEntity.ok(new SuccessResponse(success));
     }
 }

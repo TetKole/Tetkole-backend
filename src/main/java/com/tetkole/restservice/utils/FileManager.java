@@ -82,6 +82,11 @@ public class FileManager {
         return null;
     }
 
+    public boolean deleteFile(String relativePath, String fileName) {
+        File file = new File(path + "/" + relativePath + "/" + fileName);
+        return file.delete();
+    }
+
     public boolean createMultipartFile(String relativePath, MultipartFile file) {
         try {
             Path pathFile = Paths.get(path + "/" + relativePath + "/" + file.getOriginalFilename());
@@ -172,5 +177,15 @@ public class FileManager {
         } catch (Exception IOException) {
             System.err.println("Could not write in " + jsonFile.getName());
         }
+    }
+
+    public boolean deleteAnnotationFromFolder(String relativePathFolder) {
+        File folder = new File(path + "/" + relativePathFolder);
+        File[] files = folder.listFiles();
+        assert files != null;
+        for (File f : files) {
+            if (!f.delete()) return false;
+        }
+        return folder.delete();
     }
 }
