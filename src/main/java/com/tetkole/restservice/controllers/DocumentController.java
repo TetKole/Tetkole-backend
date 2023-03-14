@@ -3,6 +3,7 @@ package com.tetkole.restservice.controllers;
 import com.tetkole.restservice.models.Annotation;
 import com.tetkole.restservice.models.Document;
 import com.tetkole.restservice.models.User;
+import com.tetkole.restservice.payload.request.RenameRequest;
 import com.tetkole.restservice.payload.response.SuccessResponse;
 import com.tetkole.restservice.repositories.AnnotationRepository;
 import com.tetkole.restservice.repositories.DocumentRepository;
@@ -175,6 +176,56 @@ public class DocumentController {
         }
 
         return ResponseEntity.ok(new SuccessResponse(success));
+    }
+
+    @PutMapping("annotation/{annotationId}")
+    public ResponseEntity<?> renameAnnotation(@Valid @PathVariable Integer annotationId,
+                                              @RequestBody RenameRequest renameRequest)
+    {
+        JSONObject jsonError = new JSONObject();
+
+        Optional<Annotation> annotation = annotationRepository.findById(annotationId);
+
+        if (annotation.isEmpty()) {
+            jsonError.put("Error", "The annotation doesn't exist");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        // TODO catch si ça marche pas et faire une réponse que ça a pas marché
+        fileManager.renameAnnotation(annotation.get(), renameRequest.newName());
+
+        annotation.get().setName(renameRequest.newName());
+
+        annotationRepository.save(annotation.get());
+
+        return ResponseEntity.ok(new SuccessResponse(true));
+    }
+
+    @PutMapping("{docID}")
+    public ResponseEntity<?> renameDoc(@Valid @PathVariable Integer docID,
+                                              @RequestBody RenameRequest renameRequest)
+    {
+        JSONObject jsonError = new JSONObject();
+
+        Optional<Document> document = documentRepository.findOneByDocId(docID);
+
+        if(document.isEmpty()) {
+            jsonError.put("Error", "The document doesn't exist");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        // TODO catch si ça marche pas et faire une réponse que ça a pas marché
+        fileManager.renameDocument(document.get(), renameRequest.newName());
+
+        document.get().setName(renameRequest.newName());
+
+        documentRepository.save(document.get());
+
+        return ResponseEntity.ok(new SuccessResponse(true));
     }
 
 

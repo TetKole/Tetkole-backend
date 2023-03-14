@@ -3,6 +3,7 @@ package com.tetkole.restservice.utils;
 import com.tetkole.restservice.models.Annotation;
 import com.tetkole.restservice.models.Corpus;
 import com.tetkole.restservice.models.Document;
+import com.tetkole.restservice.models.EDocumentType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
@@ -53,6 +55,66 @@ public class FileManager {
         // create it if needed
         if (!new File(this.path).mkdir())
             System.out.println("INFO: " + this.path + " already exists.");
+    }
+
+    /**
+     * Rename file's name to newName.
+     */
+    public File renameFile(File file, String newName) {
+        System.gc();
+
+        file.renameTo(new File(file.getParentFile() + "/" + newName));
+        return new File(file.getParentFile() + "/" + newName);
+    }
+
+    public File absoluteCopyFile(File fileToCopy, String destPath) {
+        try {
+            Path newFilePath = Files.copy(fileToCopy.toPath(), (new File(destPath).toPath()), StandardCopyOption.REPLACE_EXISTING);
+            return newFilePath.toFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void renameDirectoryDocument(Document doc, String newName) {
+        String destPath = this.path + "/" + doc.getCorpus().getName() + "/Annotations/" + newName;
+        File source = new File(this.path + "/" + doc.getCorpus().getName() + "/Annotations/" + doc.getName());
+        File dest = new File(destPath);
+        dest.mkdir();
+        File[] files = source.listFiles();
+        if (files != null) {
+            for (int i = 0; i < files.length; i++) {
+                File destAnnot = new File(destPath + "/" + files[i].getName());
+                destAnnot.mkdir();
+                File[] filesAnnot = files[i].listFiles();
+                for (int j = 0; j < filesAnnot.length; j++) {
+                    this.absoluteCopyFile(filesAnnot[j], destAnnot.getPath() + "/" + filesAnnot[j].getName());
+                }
+            }
+        }
+        this.deleteFolder(source);
+    }
+
+    public void deleteFile(File fileToDelete) {
+        if (!fileToDelete.delete()) {
+            System.err.println("\nCannot delete file " + fileToDelete.getName());
+        }
+    }
+
+    public void deleteFolder(File folderToDelete) {
+        File[] allContents = folderToDelete.listFiles();
+        if (allContents != null) {
+            for (File file : allContents) {
+                if (file.isDirectory()) {
+                    deleteFolder(file);
+                } else {
+                    this.deleteFile(file);
+                }
+            }
+        }
+        if (!folderToDelete.delete()) {
+            System.err.println("\nCannot delete directory " + folderToDelete.getName());
+        }
     }
 
     public void createCorpusFolder(String folderName) {
@@ -178,6 +240,110 @@ public class FileManager {
                 }
 
                 if (done) break;
+            }
+        }
+
+        writeJSONFile(corpus_state, corpus_content);
+    }
+
+    public void renameDirectoryAnnotation(Annotation annotation, String newName) {
+        String destPath = this.path + "/" + annotation.getDocument().getCorpus().getName() + "/Annotations/" + annotation.getDocument().getName() + "/" + newName;
+        File source = new File(this.path + "/" + annotation.getDocument().getCorpus().getName() + "/Annotations/" + annotation.getDocument().getName() + "/" + annotation.getName());
+        File dest = new File(destPath);
+        System.out.println(destPath);
+        dest.mkdir();
+        File[] files = source.listFiles();
+        if (files != null) {
+            for (int j = 0; j < files.length; j++) {
+                this.absoluteCopyFile(files[j], dest.getPath() + "/" + files[j].getName());
+            }
+        }
+        this.deleteFolder(source);
+    }
+
+    public void renameAnnotation(Annotation annotation, String newName) {
+        String folderPathAnnotation = path + "/" + annotation.getDocument().getCorpus().getName() + "/" + "Annotations" + "/" + annotation.getDocument().getName() + "/" + annotation.getName();
+        File fileAudio = new File(folderPathAnnotation + "/" + annotation.getName());
+        File fileJSON = new File(folderPathAnnotation + "/" + annotation.getName().split("\\.")[0] + "." + "json");
+
+        // Rename the field "recordName" in annotation.json
+        JSONObject jsonObject =  this.readJSONFile(fileJSON);
+        jsonObject.put("recordName", newName);
+        this.writeJSONFile(fileJSON, jsonObject);
+
+        // Rename the files
+        this.renameFile(fileJSON, newName.split("\\.")[0] + ".json");
+        this.renameFile(fileAudio, newName);
+        this.renameDirectoryAnnotation(annotation, newName);
+
+        // Rename annotation's name in corpus_state.json
+        File corpus_state = new File(path + "/" + annotation.getDocument().getCorpus().getName() + "/" + CORPUS_STATE);
+        JSONObject corpus_content = readJSONFile(corpus_state);
+        if(corpus_content == null) return;
+
+        JSONArray documents = corpus_content.getJSONArray("documents");
+
+        boolean done = false;
+
+        for (int i = 0; i < documents.length(); i++) {
+            JSONObject document = documents.getJSONObject(i);
+            JSONArray annotations = document.getJSONArray("annotations");
+
+            for (int j = 0; j < annotations.length(); j++) {
+                JSONObject a = annotations.getJSONObject(j);
+
+                if (a.getInt("annotationId") == annotation.getAnnotationId()) {
+                    a.put("name", newName);
+                    annotations.put(i, a);
+                    document.put("annotations", annotations);
+                    documents.put(i, document);
+                    corpus_content.put("documents",documents);
+                    done = true;
+                    break;
+                }
+
+                if (done) break;
+            }
+        }
+
+        writeJSONFile(corpus_state, corpus_content);
+    }
+
+    public void renameDocument(Document doc, String newName) {
+
+        // Rename the doc name in all json annotation
+        String folderPathAnnotation = path + "/" + doc.getCorpus().getName() + "/" + "Annotations" + "/" + doc.getName();
+        for (Annotation a: doc.getAnnotations()
+             ) {
+            File fileJSON = new File(folderPathAnnotation + "/" + a.getName() + "/" + a.getName().split("\\.")[0] + "." + "json");
+            JSONObject jsonAnnotation = this.readJSONFile(fileJSON);
+            jsonAnnotation.put("fileName", newName);
+            this.writeJSONFile(fileJSON, jsonAnnotation);
+        }
+
+        // Rename the file audio
+        File fileAudio = new File(path + "/" + doc.getCorpus().getName() + "/" + doc.getType() + "/" + doc.getName());
+        this.renameFile(fileAudio, newName);
+        this.renameDirectoryDocument(doc, newName);
+
+        File corpus_state = new File(path + "/" + doc.getCorpus().getName() + "/" + CORPUS_STATE);
+
+        // Rename doc's name in corpus_state.json
+        JSONObject corpus_content = readJSONFile(corpus_state);
+        if(corpus_content == null) return;
+
+        JSONArray documents = corpus_content.getJSONArray("documents");
+
+        boolean done = false;
+
+        for (int i = 0; i < documents.length(); i++) {
+            JSONObject document_json = documents.getJSONObject(i);
+
+            if(document_json.get("docId").equals(doc.getDocId())) {
+                document_json.put("name", newName);
+                documents.put(i, document_json);
+                corpus_content.put("documents",documents);
+                break;
             }
         }
 
