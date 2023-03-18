@@ -30,7 +30,6 @@ public class CorpusController {
 
 
     /* -- PUSH INIT -- */
-
     /**
      * Première méthode à être utilisée pour PUSH INIT
      * POST /api/corpus avec dans le body en json : {"corpusName": "nouveauCorpus"}
@@ -119,11 +118,9 @@ public class CorpusController {
 
         return ResponseEntity.ok(document.get().toJson().toString());
     }
-
     /* -- END PUSH INIT -- */
 
     /* -- CORPUS CLONE --*/
-
     @GetMapping("/{id}/clone")
     public ResponseEntity<?> getCorpusState(@Valid @PathVariable Integer id)
     {
@@ -147,7 +144,6 @@ public class CorpusController {
 
         return ResponseEntity.ok(corpus_state.toString());
     }
-
     /* -- END CLONE -- */
 
     /* -- CORPUS LIST --*/
@@ -164,4 +160,34 @@ public class CorpusController {
         return new ResponseEntity<>(response.toString(),HttpStatus.OK);
     }
     /* -- END CORPUS LIST --*/
+
+    /* -- CORPUS VERSIONNING --*/
+    @PostMapping ("/{id}/createVersion")
+    public ResponseEntity<?> createVersion(@Valid @PathVariable Integer id)
+    {
+        JSONObject jsonError = new JSONObject();
+
+        Optional<Corpus> corpus = corpusRepository.findOneByCorpusId(id);
+        if(corpus.isEmpty()) {
+            jsonError.put("Error", "The corpus doesn't exist");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        // TODO vérifier si le mec connecté est modo ou admin du corpus
+
+        if(!fileManager.createZipVersion(corpus.get())){
+            jsonError.put("Error", "The server have a probleme to create a version");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        corpus.get().nextVersion();
+        corpusRepository.save(corpus.get());
+
+        return new ResponseEntity<>("Version created",HttpStatus.OK);
+    }
+    /* -- END CORPUS VERSIONNING --*/
 }

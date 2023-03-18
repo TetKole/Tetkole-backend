@@ -20,15 +20,22 @@ public class Corpus {
     @Column(name="name", nullable=false)
     private String name;
 
+    @Column(name="version", nullable=false)
+    private Integer version;
+
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "corpus")
     private List<Document> documents = new ArrayList<>();
 
     public Corpus(String name) {
         this.name = name;
+        this.version = 1;
+    }
+
+    public void nextVersion() {
+        this.version++;
     }
 
     public Corpus() { }
-
 
     public JSONObject toJson() {
         JSONObject json = new JSONObject();

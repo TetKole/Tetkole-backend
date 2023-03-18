@@ -17,12 +17,16 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 public class FileManager {
 
     private final String resourcesDir = "Tetkole-backend-resources";
     private final String path;
+    private final String versionsDirectory = "/versions";
+    private final String corpusDirectory = "/corpus";
     private final String CORPUS_STATE = "corpus_state.json";
 
 
@@ -55,6 +59,10 @@ public class FileManager {
         // create it if needed
         if (!new File(this.path).mkdir())
             System.out.println("INFO: " + this.path + " already exists.");
+        else {
+            new File(this.path + versionsDirectory).mkdir();
+            new File(this.path + corpusDirectory).mkdir();
+        }
     }
 
     /**
@@ -77,8 +85,8 @@ public class FileManager {
     }
 
     public void renameDirectoryDocument(Document doc, String newName) {
-        String destPath = this.path + "/" + doc.getCorpus().getName() + "/Annotations/" + newName;
-        File source = new File(this.path + "/" + doc.getCorpus().getName() + "/Annotations/" + doc.getName());
+        String destPath = this.path + corpusDirectory + "/" + doc.getCorpus().getName() + "/Annotations/" + newName;
+        File source = new File(this.path + corpusDirectory + "/" + doc.getCorpus().getName() + "/Annotations/" + doc.getName());
         File dest = new File(destPath);
         dest.mkdir();
         File[] files = source.listFiles();
@@ -118,21 +126,21 @@ public class FileManager {
     }
 
     public void createCorpusFolder(String folderName) {
-        String absolutePath = this.path + "/" + folderName;
+        String absolutePath = this.path + corpusDirectory + "/" + folderName;
 
         if (!new File(absolutePath).mkdir())
             System.out.println("INFO: " + absolutePath + " already exists.");
     }
 
     public void createFolder(String relativePath, String folderName) {
-        String absolutePath = this.path + "/" + relativePath + "/" + folderName;
+        String absolutePath = this.path + corpusDirectory + "/" + relativePath + "/" + folderName;
 
         if (!new File(absolutePath).mkdir())
             System.out.println("INFO: " + absolutePath + " already exists.");
     }
 
     public File createFile(String relativePath, String fileName) {
-        File file = new File(path + "/" + relativePath + "/" + fileName);
+        File file = new File(this.path + corpusDirectory + "/" + relativePath + "/" + fileName);
         try {
             if (file.createNewFile())
                 return file;
@@ -145,13 +153,13 @@ public class FileManager {
     }
 
     public boolean deleteFile(String relativePath, String fileName) {
-        File file = new File(path + "/" + relativePath + "/" + fileName);
+        File file = new File(this.path + corpusDirectory + "/" + relativePath + "/" + fileName);
         return file.delete();
     }
 
     public boolean createMultipartFile(String relativePath, MultipartFile file) {
         try {
-            Path pathFile = Paths.get(path + "/" + relativePath + "/" + file.getOriginalFilename());
+            Path pathFile = Paths.get(this.path + corpusDirectory + "/" + relativePath + "/" + file.getOriginalFilename());
             file.transferTo(pathFile);
             return true;
         } catch (IOException e) {
@@ -161,7 +169,7 @@ public class FileManager {
     }
 
     public JSONObject getCorpusStateContent(String corpusName) {
-        File corpus_state = new File(path + "/" + corpusName + "/" + CORPUS_STATE);
+        File corpus_state = new File(this.path + corpusDirectory + "/" + corpusName + "/" + CORPUS_STATE);
         if(corpus_state.exists()) {
             return readJSONFile(corpus_state);
         }
@@ -175,7 +183,7 @@ public class FileManager {
     }
 
     public void addDocumentInCorpusState(Document doc) {
-        File corpus_state = new File(path + "/" + doc.getCorpus().getName() + "/" + CORPUS_STATE);
+        File corpus_state = new File(this.path + corpusDirectory + "/" + doc.getCorpus().getName() + "/" + CORPUS_STATE);
         JSONObject corpus_content = readJSONFile(corpus_state);
 
         if(corpus_content == null) return;
@@ -191,7 +199,7 @@ public class FileManager {
 
     public void addAnnotationInCorpusState(Annotation annotation) {
 
-        File corpus_state = new File(path + "/" + annotation.getDocument().getCorpus().getName() + "/" + CORPUS_STATE);
+        File corpus_state = new File(this.path + corpusDirectory + "/" + annotation.getDocument().getCorpus().getName() + "/" + CORPUS_STATE);
 
         JSONObject corpus_content = readJSONFile(corpus_state);
         if(corpus_content == null) return;
@@ -214,7 +222,7 @@ public class FileManager {
     }
 
     public void deleteAnnotationInCorpusState(Annotation annotation) {
-        File corpus_state = new File(path + "/" + annotation.getDocument().getCorpus().getName() + "/" + CORPUS_STATE);
+        File corpus_state = new File(this.path + corpusDirectory + "/" + annotation.getDocument().getCorpus().getName() + "/" + CORPUS_STATE);
 
         JSONObject corpus_content = readJSONFile(corpus_state);
         if(corpus_content == null) return;
@@ -247,8 +255,8 @@ public class FileManager {
     }
 
     public void renameDirectoryAnnotation(Annotation annotation, String newName) {
-        String destPath = this.path + "/" + annotation.getDocument().getCorpus().getName() + "/Annotations/" + annotation.getDocument().getName() + "/" + newName;
-        File source = new File(this.path + "/" + annotation.getDocument().getCorpus().getName() + "/Annotations/" + annotation.getDocument().getName() + "/" + annotation.getName());
+        String destPath = this.path + corpusDirectory + "/" + annotation.getDocument().getCorpus().getName() + "/Annotations/" + annotation.getDocument().getName() + "/" + newName;
+        File source = new File(this.path + corpusDirectory + "/" + annotation.getDocument().getCorpus().getName() + "/Annotations/" + annotation.getDocument().getName() + "/" + annotation.getName());
         File dest = new File(destPath);
         System.out.println(destPath);
         dest.mkdir();
@@ -262,7 +270,7 @@ public class FileManager {
     }
 
     public void renameAnnotation(Annotation annotation, String newName) {
-        String folderPathAnnotation = path + "/" + annotation.getDocument().getCorpus().getName() + "/" + "Annotations" + "/" + annotation.getDocument().getName() + "/" + annotation.getName();
+        String folderPathAnnotation = this.path + corpusDirectory + "/" + annotation.getDocument().getCorpus().getName() + "/" + "Annotations" + "/" + annotation.getDocument().getName() + "/" + annotation.getName();
         File fileAudio = new File(folderPathAnnotation + "/" + annotation.getName());
         File fileJSON = new File(folderPathAnnotation + "/" + annotation.getName().split("\\.")[0] + "." + "json");
 
@@ -277,7 +285,7 @@ public class FileManager {
         this.renameDirectoryAnnotation(annotation, newName);
 
         // Rename annotation's name in corpus_state.json
-        File corpus_state = new File(path + "/" + annotation.getDocument().getCorpus().getName() + "/" + CORPUS_STATE);
+        File corpus_state = new File(this.path + corpusDirectory + "/" + annotation.getDocument().getCorpus().getName() + "/" + CORPUS_STATE);
         JSONObject corpus_content = readJSONFile(corpus_state);
         if(corpus_content == null) return;
 
@@ -312,7 +320,7 @@ public class FileManager {
     public void renameDocument(Document doc, String newName) {
 
         // Rename the doc name in all json annotation
-        String folderPathAnnotation = path + "/" + doc.getCorpus().getName() + "/" + "Annotations" + "/" + doc.getName();
+        String folderPathAnnotation = this.path + corpusDirectory + "/" + doc.getCorpus().getName() + "/" + "Annotations" + "/" + doc.getName();
         for (Annotation a: doc.getAnnotations()
              ) {
             File fileJSON = new File(folderPathAnnotation + "/" + a.getName() + "/" + a.getName().split("\\.")[0] + "." + "json");
@@ -322,11 +330,11 @@ public class FileManager {
         }
 
         // Rename the file audio
-        File fileAudio = new File(path + "/" + doc.getCorpus().getName() + "/" + doc.getType() + "/" + doc.getName());
+        File fileAudio = new File(this.path + corpusDirectory + "/" + doc.getCorpus().getName() + "/" + doc.getType() + "/" + doc.getName());
         this.renameFile(fileAudio, newName);
         this.renameDirectoryDocument(doc, newName);
 
-        File corpus_state = new File(path + "/" + doc.getCorpus().getName() + "/" + CORPUS_STATE);
+        File corpus_state = new File(this.path + corpusDirectory + "/" + doc.getCorpus().getName() + "/" + CORPUS_STATE);
 
         // Rename doc's name in corpus_state.json
         JSONObject corpus_content = readJSONFile(corpus_state);
@@ -352,7 +360,7 @@ public class FileManager {
 
     public void deleteDocumentInCorpusState(Document document) {
 
-        File corpus_state = new File(path + "/" + document.getCorpus().getName() + "/" + CORPUS_STATE);
+        File corpus_state = new File(this.path + corpusDirectory + "/" + document.getCorpus().getName() + "/" + CORPUS_STATE);
 
         JSONObject corpus_content = readJSONFile(corpus_state);
         if(corpus_content == null) return;
@@ -401,12 +409,58 @@ public class FileManager {
     }
 
     public boolean deleteAnnotationFromFolder(String relativePathFolder) {
-        File folder = new File(path + "/" + relativePathFolder);
+        File folder = new File(this.path + corpusDirectory + "/" + relativePathFolder);
         File[] files = folder.listFiles();
         assert files != null;
         for (File f : files) {
             if (!f.delete()) return false;
         }
         return folder.delete();
+    }
+
+    public boolean createZipVersion(Corpus corpus) {
+        String sourceFile = this.path + corpusDirectory + "/" + corpus.getName();
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(this.path + versionsDirectory + "/" + corpus.getName() + "-" + corpus.getVersion() + ".zip");
+            ZipOutputStream zipOut = new ZipOutputStream(fos);
+            File fileToZip = new File(sourceFile);
+            zipFile(fileToZip, fileToZip.getName(), zipOut);
+            zipOut.close();
+            fos.close();
+            return true;
+        } catch (IOException e) {
+            System.err.println("Could not create the version" + corpus.getName() + "-" + corpus.getVersion());
+            return false;
+        }
+    }
+
+    private static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
+        if (fileToZip.isHidden()) {
+            return;
+        }
+        if (fileToZip.isDirectory()) {
+            if (fileName.endsWith("/")) {
+                zipOut.putNextEntry(new ZipEntry(fileName));
+                zipOut.closeEntry();
+            } else {
+                zipOut.putNextEntry(new ZipEntry(fileName + "/"));
+                zipOut.closeEntry();
+            }
+            File[] children = fileToZip.listFiles();
+            for (File childFile : children) {
+                zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
+            }
+            return;
+        }
+        FileInputStream fis = new FileInputStream(fileToZip);
+        ZipEntry zipEntry = new ZipEntry(fileName);
+        zipOut.putNextEntry(zipEntry);
+        byte[] bytes = new byte[1024];
+        int length;
+        while ((length = fis.read(bytes)) >= 0) {
+            zipOut.write(bytes, 0, length);
+        }
+        fis.close();
     }
 }
