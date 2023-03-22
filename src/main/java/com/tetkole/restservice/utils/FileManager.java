@@ -272,7 +272,12 @@ public class FileManager {
     public void renameAnnotation(Annotation annotation, String newName) {
         String folderPathAnnotation = this.path + corpusDirectory + "/" + annotation.getDocument().getCorpus().getName() + "/" + "Annotations" + "/" + annotation.getDocument().getName() + "/" + annotation.getName();
         File fileAudio = new File(folderPathAnnotation + "/" + annotation.getName());
-        File fileJSON = new File(folderPathAnnotation + "/" + annotation.getName().split("\\.")[0] + "." + "json");
+
+        String[] fileNamePart = annotation.getName().split("\\.");
+        String ext = "." + fileNamePart[fileNamePart.length - 1];
+        String trueFileName = annotation.getName().substring(0, annotation.getName().length() - ext.length());
+
+        File fileJSON = new File(folderPathAnnotation + "/" + trueFileName + "." + "json");
 
         // Rename the field "recordName" in annotation.json
         JSONObject jsonObject =  this.readJSONFile(fileJSON);
@@ -280,7 +285,9 @@ public class FileManager {
         this.writeJSONFile(fileJSON, jsonObject);
 
         // Rename the files
-        this.renameFile(fileJSON, newName.split("\\.")[0] + ".json");
+        String trueNewFileName = newName.substring(0, newName.length() - ext.length());
+
+        this.renameFile(fileJSON, trueNewFileName + ".json");
         this.renameFile(fileAudio, newName);
         this.renameDirectoryAnnotation(annotation, newName);
 
@@ -323,7 +330,11 @@ public class FileManager {
         String folderPathAnnotation = this.path + corpusDirectory + "/" + doc.getCorpus().getName() + "/" + "Annotations" + "/" + doc.getName();
         for (Annotation a: doc.getAnnotations()
              ) {
-            File fileJSON = new File(folderPathAnnotation + "/" + a.getName() + "/" + a.getName().split("\\.")[0] + "." + "json");
+            String[] fileNamePart = a.getName().split("\\.");
+            String ext = "." + fileNamePart[fileNamePart.length - 1];
+            String trueFileName = a.getName().substring(0, a.getName().length() - ext.length());
+
+            File fileJSON = new File(folderPathAnnotation + "/" + a.getName() + "/" + trueFileName + "." + "json");
             JSONObject jsonAnnotation = this.readJSONFile(fileJSON);
             jsonAnnotation.put("fileName", newName);
             this.writeJSONFile(fileJSON, jsonAnnotation);
