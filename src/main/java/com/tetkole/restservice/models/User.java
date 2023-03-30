@@ -36,7 +36,8 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-
+    @OneToMany(mappedBy = "user")
+    List<UserCorpusRole> corpus;
 
     @Override @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {

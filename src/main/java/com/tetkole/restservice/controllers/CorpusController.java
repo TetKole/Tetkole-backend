@@ -1,17 +1,19 @@
 package com.tetkole.restservice.controllers;
 
-import com.tetkole.restservice.models.Corpus;
-import com.tetkole.restservice.models.Document;
-import com.tetkole.restservice.models.EDocumentType;
+import com.tetkole.restservice.models.*;
 import com.tetkole.restservice.payload.request.CorpusCreationRequest;
 import com.tetkole.restservice.repositories.CorpusRepository;
 import com.tetkole.restservice.repositories.DocumentRepository;
+import com.tetkole.restservice.repositories.UserCorpusRoleRepository;
+import com.tetkole.restservice.repositories.UserRepository;
 import com.tetkole.restservice.utils.FileManager;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +28,8 @@ public class CorpusController {
 
     public final CorpusRepository corpusRepository;
     public final DocumentRepository documentRepository;
+    public  final UserRepository userRepository;
+    public final UserCorpusRoleRepository userCorpusRoleRepository;
     public final FileManager fileManager;
 
 
@@ -39,7 +43,18 @@ public class CorpusController {
     @PostMapping()
     public ResponseEntity<?> addCorpus(@Valid @RequestBody CorpusCreationRequest corpusCreationRequest)
     {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth != null ? auth.getName() : null;
+        Optional<User> user =  userRepository.findOneByEmail(username);
+
         JSONObject jsonError = new JSONObject();
+
+        if(user.isEmpty()) {
+            jsonError.put("Error", "The user doesn't exist");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
 
         // Check if corpus with same name already exist
         if (corpusRepository.existsByName(corpusCreationRequest.corpusName())) {
@@ -59,12 +74,13 @@ public class CorpusController {
         fileManager.createFolder(corpusName, "Images");
         fileManager.createFolder(corpusName, "Videos");
 
-        corpusRepository.save(new Corpus(corpusName));
+        Corpus corpus = new Corpus(corpusName);
+        corpusRepository.save(corpus);
+        userCorpusRoleRepository.save(new UserCorpusRole(user.get(), corpus, Role.MODERATOR));
 
-        Optional<Corpus> corpus = corpusRepository.findTopByOrderByCorpusIdDesc();
 
         // création de corpus_state.json
-        fileManager.createCorpusState(corpus.get());
+        fileManager.createCorpusState(corpus);
 
         return ResponseEntity.ok(corpus);
     }

@@ -26,6 +26,8 @@ public class Corpus {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "corpus")
     private List<Document> documents = new ArrayList<>();
 
+    @OneToMany(mappedBy = "corpus")
+    List<UserCorpusRole> users;
     public Corpus(String name) {
         this.name = name;
         this.version = 1;
