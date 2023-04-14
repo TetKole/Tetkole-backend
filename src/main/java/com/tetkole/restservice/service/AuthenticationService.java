@@ -68,7 +68,7 @@ public class AuthenticationService {
 
         String jwtToken = jwtService.generatedToken(user);
 
-        return new LoginResponse(jwtToken, user.getUserId(), user.getFirstname(), user.getLastname(), user.getEmail());
+        return new LoginResponse(jwtToken, user.getUserId(), user.getFirstname(), user.getLastname(), user.getEmail(), user.getRole().toString());
     }
 
     public SuccessResponse changePassword(ChangePasswordRequest request) {

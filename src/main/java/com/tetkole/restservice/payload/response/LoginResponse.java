@@ -5,6 +5,8 @@ public record LoginResponse(
     Integer userId,
     String firstname,
     String lastname,
-    String mail
+    String mail,
+
+    String role
 ) { }
 
