@@ -86,10 +86,13 @@ public class AuthenticationService {
     //if user is Admin OR moderator give a service to force change password
     public SuccessResponse forceResetPassword(ForcePasswordRequest request) {
         User user = repository.findOneByEmail(request.mail()).orElseThrow();
+        User admin = repository.findOneByEmail(request.adminMail()).orElseThrow();
         if (request.newPassword().length() > 0) {
-            user.setPassword(passwordEncoder.encode(request.newPassword()));
-            repository.save(user);
-            return new SuccessResponse(true);
+            if (admin.getRole() == Role.ADMIN || admin.getRole() == Role.MODERATOR){
+                user.setPassword(passwordEncoder.encode(request.newPassword()));
+                repository.save(user);
+                return new SuccessResponse(true);
+            }
         }
         return new SuccessResponse(false);
     }
