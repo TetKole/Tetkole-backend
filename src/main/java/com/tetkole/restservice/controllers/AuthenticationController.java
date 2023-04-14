@@ -1,9 +1,12 @@
 package com.tetkole.restservice.controllers;
 
+import com.tetkole.restservice.payload.request.ChangePasswordRequest;
+import com.tetkole.restservice.payload.request.ForcePasswordRequest;
 import com.tetkole.restservice.payload.request.LoginRequest;
 import com.tetkole.restservice.payload.request.RegisterRequest;
 import com.tetkole.restservice.payload.response.LoginResponse;
 import com.tetkole.restservice.payload.response.RegisterResponse;
+import com.tetkole.restservice.payload.response.SuccessResponse;
 import com.tetkole.restservice.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,4 +31,15 @@ public class AuthenticationController {
     public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(service.login(request));
     }
+
+    @PostMapping("/changePassword")
+    public ResponseEntity<SuccessResponse> changePassword(@RequestBody ChangePasswordRequest request) {
+        return ResponseEntity.ok(service.changePassword(request));
+    }
+
+    @PostMapping("/forceResetPassword")
+    public ResponseEntity<SuccessResponse> forceResetPassword(@RequestBody ForcePasswordRequest request) {
+        return ResponseEntity.ok(service.forceResetPassword(request));
+    }
+
 }
