@@ -2,6 +2,7 @@ package com.tetkole.restservice.controllers;
 
 import com.tetkole.restservice.models.*;
 import com.tetkole.restservice.payload.request.CorpusCreationRequest;
+import com.tetkole.restservice.payload.response.UserDTO;
 import com.tetkole.restservice.repositories.CorpusRepository;
 import com.tetkole.restservice.repositories.DocumentRepository;
 import com.tetkole.restservice.repositories.UserCorpusRoleRepository;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -206,4 +208,24 @@ public class CorpusController {
         return new ResponseEntity<>("Version created",HttpStatus.OK);
     }
     /* -- END CORPUS VERSIONNING --*/
+
+    @GetMapping ("/{id}/users")
+    public ResponseEntity<?> getAllUsers(@Valid @PathVariable Integer id) {
+        JSONObject jsonError = new JSONObject();
+
+        Optional<Corpus> corpus = corpusRepository.findOneByCorpusId(id);
+        if(corpus.isEmpty()) {
+            jsonError.put("Error", "The corpus doesn't exist");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        List<UserDTO> users = new ArrayList<>();
+        for (UserCorpusRole u : corpus.get().getUsers()) {
+            users.add(new UserDTO(u.getUser()));
+        }
+
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
 }

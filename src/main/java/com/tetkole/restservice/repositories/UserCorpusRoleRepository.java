@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.support.JpaRepositoryImplementati
 import java.util.List;
 
 public interface UserCorpusRoleRepository  extends JpaRepositoryImplementation<UserCorpusRole, Integer> {
-    List<Corpus> findAllByUser(User user);
-    List<User> findAllByCorpus(Corpus corpus);
+    List<UserCorpusRole> findAllByUser(User user);
+    List<UserCorpusRole> findAllByCorpus(Corpus corpus);
 }
