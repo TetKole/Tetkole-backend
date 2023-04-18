@@ -207,6 +207,24 @@ public class CorpusController {
 
         return new ResponseEntity<>("Version created",HttpStatus.OK);
     }
+
+    @GetMapping ("/{id}/currentVersion")
+    public ResponseEntity<?> getCurrentVersion(@Valid @PathVariable Integer id)
+    {
+        JSONObject jsonError = new JSONObject();
+
+        Optional<Corpus> corpus = corpusRepository.findOneByCorpusId(id);
+        if(corpus.isEmpty()) {
+            jsonError.put("Error", "The corpus doesn't exist");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(corpus.get().getVersion() - 1);
+    }
     /* -- END CORPUS VERSIONNING --*/
 
     @GetMapping ("/{id}/users")

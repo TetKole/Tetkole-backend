@@ -433,7 +433,10 @@ public class FileManager {
         String sourceFile = this.path + corpusDirectory + "/" + corpus.getName();
         FileOutputStream fos = null;
         try {
-            fos = new FileOutputStream(this.path + versionsDirectory + "/" + corpus.getName() + "-" + corpus.getVersion() + ".zip");
+            if(corpus.getVersion() == 1) {
+                new File(this.path + versionsDirectory + "/" + corpus.getName()).mkdir();
+            }
+            fos = new FileOutputStream(this.path + versionsDirectory + "/" + corpus.getName() + "/" + corpus.getName() + "-" + corpus.getVersion() + ".zip");
             ZipOutputStream zipOut = new ZipOutputStream(fos);
             File fileToZip = new File(sourceFile);
             zipFile(fileToZip, fileToZip.getName(), zipOut);
