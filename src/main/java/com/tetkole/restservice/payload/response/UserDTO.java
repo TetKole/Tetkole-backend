@@ -4,6 +4,7 @@ import com.tetkole.restservice.models.Role;
 import com.tetkole.restservice.models.User;
 import com.tetkole.restservice.models.UserCorpusRole;
 import lombok.Data;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,5 +28,14 @@ public class UserDTO {
         for (UserCorpusRole userCorpusRole: user.getCorpus()) {
             this.corpus.add(userCorpusRole.getCorpus().getName());
         }
+    }
+
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        json.put("name", this.firstname + " " + this.lastname);
+        json.put("email", this.email);
+        json.put("role", this.role);
+        json.put("userId", this.userId);
+        return json;
     }
 }

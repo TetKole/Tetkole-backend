@@ -4,6 +4,7 @@ package com.tetkole.restservice.service;
 import com.tetkole.restservice.config.JwtService;
 import com.tetkole.restservice.models.Role;
 import com.tetkole.restservice.models.User;
+import com.tetkole.restservice.models.UserCorpusRole;
 import com.tetkole.restservice.payload.request.ChangePasswordRequest;
 import com.tetkole.restservice.payload.request.ForcePasswordRequest;
 import com.tetkole.restservice.payload.request.LoginRequest;
@@ -11,6 +12,7 @@ import com.tetkole.restservice.payload.request.RegisterRequest;
 import com.tetkole.restservice.payload.response.LoginResponse;
 import com.tetkole.restservice.payload.response.RegisterResponse;
 import com.tetkole.restservice.payload.response.SuccessResponse;
+import com.tetkole.restservice.repositories.UserCorpusRoleRepository;
 import com.tetkole.restservice.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,11 +20,15 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
 
     private final UserRepository repository;
+    private final UserCorpusRoleRepository userCorpusRoleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -68,7 +74,11 @@ public class AuthenticationService {
 
         String jwtToken = jwtService.generatedToken(user);
 
-        return new LoginResponse(jwtToken, user.getUserId(), user.getFirstname(), user.getLastname(), user.getEmail(), user.getRole().toString());
+        List<UserCorpusRole> userCorpusRoles = userCorpusRoleRepository.findAllByUser(user);
+        HashMap<Integer, String> roles = new HashMap<>();
+        userCorpusRoles.forEach(userCorpusRole -> roles.put(userCorpusRole.getCorpus().getCorpusId(), userCorpusRole.getRole().toString()));
+
+        return new LoginResponse(jwtToken, user.getUserId(), user.getFirstname(), user.getLastname(), user.getEmail(), user.getRole().toString(), roles);
     }
 
     public SuccessResponse changePassword(ChangePasswordRequest request) {

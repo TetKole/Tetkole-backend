@@ -221,11 +221,15 @@ public class CorpusController {
                     .body(jsonError.toString());
         }
 
-        List<UserDTO> users = new ArrayList<>();
+        JSONArray response = new JSONArray();
+        if(corpus.get().getUsers().isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
         for (UserCorpusRole u : corpus.get().getUsers()) {
-            users.add(new UserDTO(u.getUser()));
+            UserDTO tmp = new UserDTO(u.getUser());
+            response.put(tmp.toJson());
         }
 
-        return new ResponseEntity<>(users, HttpStatus.OK);
+        return new ResponseEntity<>(response.toString(),HttpStatus.OK);
     }
 }
