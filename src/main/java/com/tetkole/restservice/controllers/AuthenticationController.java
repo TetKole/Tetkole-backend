@@ -1,9 +1,6 @@
 package com.tetkole.restservice.controllers;
 
-import com.tetkole.restservice.payload.request.ChangePasswordRequest;
-import com.tetkole.restservice.payload.request.ForcePasswordRequest;
-import com.tetkole.restservice.payload.request.LoginRequest;
-import com.tetkole.restservice.payload.request.RegisterRequest;
+import com.tetkole.restservice.payload.request.*;
 import com.tetkole.restservice.payload.response.LoginResponse;
 import com.tetkole.restservice.payload.response.RegisterResponse;
 import com.tetkole.restservice.payload.response.SuccessResponse;
@@ -40,6 +37,11 @@ public class AuthenticationController {
     @PostMapping("/forceResetPassword")
     public ResponseEntity<SuccessResponse> forceResetPassword(@RequestBody ForcePasswordRequest request) {
         return ResponseEntity.ok(service.forceResetPassword(request));
+    }
+
+    @PostMapping("/addModerator")
+    public ResponseEntity<SuccessResponse> addModerator(@RequestBody RoleChangeRequest request) {
+        return ResponseEntity.ok(service.addModerator(request));
     }
 
 }

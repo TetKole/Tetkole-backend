@@ -5,10 +5,7 @@ import com.tetkole.restservice.config.JwtService;
 import com.tetkole.restservice.models.Role;
 import com.tetkole.restservice.models.User;
 import com.tetkole.restservice.models.UserCorpusRole;
-import com.tetkole.restservice.payload.request.ChangePasswordRequest;
-import com.tetkole.restservice.payload.request.ForcePasswordRequest;
-import com.tetkole.restservice.payload.request.LoginRequest;
-import com.tetkole.restservice.payload.request.RegisterRequest;
+import com.tetkole.restservice.payload.request.*;
 import com.tetkole.restservice.payload.response.LoginResponse;
 import com.tetkole.restservice.payload.response.RegisterResponse;
 import com.tetkole.restservice.payload.response.SuccessResponse;
@@ -103,6 +100,17 @@ public class AuthenticationService {
                 repository.save(user);
                 return new SuccessResponse(true);
             }
+        }
+        return new SuccessResponse(false);
+    }
+
+    public SuccessResponse addModerator(RoleChangeRequest request) {
+        User user = repository.findOneByEmail(request.mail()).orElseThrow();
+        User admin = repository.findOneByEmail(request.adminMail()).orElseThrow();
+        if (admin.getRole() == Role.ADMIN || admin.getRole() == Role.MODERATOR){
+            user.setRole(Role.MODERATOR);
+            repository.save(user);
+            return new SuccessResponse(true);
         }
         return new SuccessResponse(false);
     }
