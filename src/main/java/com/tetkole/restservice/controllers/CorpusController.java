@@ -1,6 +1,7 @@
 package com.tetkole.restservice.controllers;
 
 import com.tetkole.restservice.models.*;
+import com.tetkole.restservice.payload.request.CorpusAddNewUserRequest;
 import com.tetkole.restservice.payload.request.CorpusCreationRequest;
 import com.tetkole.restservice.payload.response.UserDTO;
 import com.tetkole.restservice.repositories.CorpusRepository;
@@ -249,5 +250,78 @@ public class CorpusController {
         }
 
         return new ResponseEntity<>(response.toString(),HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}/users")
+    public ResponseEntity<?> addNewUserToCorpus(@Valid @PathVariable Integer id,
+                                                @Valid @RequestBody CorpusAddNewUserRequest requestBody) {
+        JSONObject jsonError = new JSONObject();
+
+        Optional<Corpus> optCorpus = corpusRepository.findOneByCorpusId(id);
+
+        if(optCorpus.isEmpty()) {
+            jsonError.put("Error", "CorpusDoesNotExist");
+            return ResponseEntity
+                    .status(400)
+                    .body(jsonError.toString());
+        }
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth != null ? auth.getName() : null;
+        Optional<User> optUser =  userRepository.findOneByEmail(username);
+
+        if(optUser.isEmpty()) {
+            jsonError.put("Error", "You are not connected");
+            return ResponseEntity
+                    .status(401)
+                    .body(jsonError.toString());
+        }
+
+        User user = optUser.get();
+
+        if(!user.isUserAdminOfCorpus(id)) {
+            jsonError.put("Error", "You are not authorized to do that");
+            return ResponseEntity
+                    .status(403)
+                    .body(jsonError.toString());
+        }
+
+        Optional<User> optUserToAdd = userRepository.findOneByEmail(requestBody.userEmail());
+
+        if(optUserToAdd.isEmpty()) {
+            jsonError.put("Error", "This user does not exist in the system yet");
+            return ResponseEntity
+                    .status(404)
+                    .body(jsonError.toString());
+        }
+
+        Optional<Role> optRole = Role.getValueFromString(requestBody.userRole());
+
+        if(optRole.isEmpty()) {
+            jsonError.put("Error", "This role is not correct");
+            return ResponseEntity
+                    .status(400)
+                    .body(jsonError.toString());
+        }
+
+        User userToAdd = optUserToAdd.get();
+
+        if(userCorpusRoleRepository.existsByUserAndCorpus(userToAdd, optCorpus.get())) {
+            jsonError.put("Error", "User already in this corpus");
+            return ResponseEntity
+                    .status(409)
+                    .body(jsonError.toString());
+        }
+
+        Role role = optRole.get();
+
+        UserCorpusRole userCorpusRole = new UserCorpusRole(userToAdd, optCorpus.get(), role);
+
+        userCorpusRoleRepository.save(userCorpusRole);
+
+
+        return ResponseEntity
+                .ok("User successfully added");
+
     }
 }

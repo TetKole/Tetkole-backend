@@ -36,6 +36,7 @@ public class UserDTO {
         json.put("email", this.email);
         json.put("role", this.role);
         json.put("userId", this.userId);
+        json.put("corpusRole", this.corpus);
         return json;
     }
 }

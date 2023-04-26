@@ -10,4 +10,6 @@ import java.util.List;
 public interface UserCorpusRoleRepository  extends JpaRepositoryImplementation<UserCorpusRole, Integer> {
     List<UserCorpusRole> findAllByUser(User user);
     List<UserCorpusRole> findAllByCorpus(Corpus corpus);
+
+    Boolean existsByUserAndCorpus(User user, Corpus corpus);
 }

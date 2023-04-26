@@ -39,6 +39,16 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     List<UserCorpusRole> corpus;
 
+    public Boolean isUserAdminOfCorpus(Integer corpusId) {
+        for(UserCorpusRole userCorpus : corpus) {
+            if(userCorpus.getCorpus().getCorpusId() == corpusId) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @Override @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // return la liste des roles
