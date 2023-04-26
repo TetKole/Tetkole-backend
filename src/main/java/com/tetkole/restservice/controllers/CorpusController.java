@@ -3,6 +3,7 @@ package com.tetkole.restservice.controllers;
 import com.tetkole.restservice.models.*;
 import com.tetkole.restservice.payload.request.CorpusAddNewUserRequest;
 import com.tetkole.restservice.payload.request.CorpusCreationRequest;
+import com.tetkole.restservice.payload.response.SuccessResponse;
 import com.tetkole.restservice.payload.response.UserDTO;
 import com.tetkole.restservice.repositories.CorpusRepository;
 import com.tetkole.restservice.repositories.DocumentRepository;
@@ -321,5 +322,40 @@ public class CorpusController {
         return ResponseEntity
                 .ok("User successfully added");
 
+    }
+
+    @DeleteMapping("/{corpusId}/{userId}")
+    public ResponseEntity<?> deleteUserFromCorpus(@Valid @PathVariable Integer corpusId,
+                                                  @Valid @PathVariable Integer userId)
+    {
+        JSONObject jsonError = new JSONObject();
+
+        Optional<Corpus> corpus = corpusRepository.findOneByCorpusId(corpusId);
+        if(corpus.isEmpty()) {
+            jsonError.put("Error", "The corpus doesn't exist");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        Optional<User> user = userRepository.findById(userId);
+        if(user.isEmpty()) {
+            jsonError.put("Error", "The user doesn't exist");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        Optional<UserCorpusRole> userCorpusRole = userCorpusRoleRepository.findByUserAndCorpus(user.get(), corpus.get());
+        if(userCorpusRole.isEmpty()) {
+            jsonError.put("Error", "The userCorpusRole doesn't exist");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        this.userCorpusRoleRepository.delete(userCorpusRole.get());
+
+        return ResponseEntity.ok(new SuccessResponse(true));
     }
 }
