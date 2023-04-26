@@ -14,11 +14,14 @@ import com.tetkole.restservice.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -79,7 +82,9 @@ public class AuthenticationService {
     }
 
     public SuccessResponse changePassword(ChangePasswordRequest request) {
-        User user = repository.findOneByEmail(request.mail()).orElseThrow();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth != null ? auth.getName() : null;
+        User user =  repository.findOneByEmail(username).get();
 
         if (passwordEncoder.matches(request.password(), user.getPassword())) {
             user.setPassword(passwordEncoder.encode(request.newPassword()));
@@ -92,10 +97,14 @@ public class AuthenticationService {
 
     //if user is Admin OR moderator give a service to force change password
     public SuccessResponse forceResetPassword(ForcePasswordRequest request) {
-        User user = repository.findOneByEmail(request.mail()).orElseThrow();
-        User admin = repository.findOneByEmail(request.adminMail()).orElseThrow();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth != null ? auth.getName() : null;
+        User adminUser =  repository.findOneByEmail(username).get();
+        Role roleOfRequest = adminUser.getRole();
+
+        User user = repository.findOneByEmail(request.mail()).get();
         if (request.newPassword().length() > 0) {
-            if (admin.getRole() == Role.ADMIN || admin.getRole() == Role.MODERATOR){
+            if (roleOfRequest == Role.ADMIN ){
                 user.setPassword(passwordEncoder.encode(request.newPassword()));
                 repository.save(user);
                 return new SuccessResponse(true);
