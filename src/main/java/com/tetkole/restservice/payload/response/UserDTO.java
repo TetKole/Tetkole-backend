@@ -7,7 +7,9 @@ import lombok.Data;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class UserDTO {
@@ -16,7 +18,7 @@ public class UserDTO {
     private String lastname;
     private String email;
     private Role role;
-    List<String> corpus;
+    Map<String, String> corpus;
 
     public UserDTO(User user) {
         this.userId = user.getUserId();
@@ -24,9 +26,9 @@ public class UserDTO {
         this.lastname = user.getLastname();
         this.email = user.getEmail();
         this.role = user.getRole();
-        this.corpus = new ArrayList<>();
+        this.corpus = new HashMap<>();
         for (UserCorpusRole userCorpusRole: user.getCorpus()) {
-            this.corpus.add(userCorpusRole.getCorpus().getName());
+            this.corpus.put(userCorpusRole.getCorpus().getName(), userCorpusRole.getRole().toString());
         }
     }
 
@@ -36,7 +38,7 @@ public class UserDTO {
         json.put("email", this.email);
         json.put("role", this.role);
         json.put("userId", this.userId);
-        json.put("corpusRole", this.corpus);
+        json.put("corpusRoles", this.corpus);
         return json;
     }
 }

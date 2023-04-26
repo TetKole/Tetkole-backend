@@ -259,7 +259,7 @@ public class CorpusController {
         Optional<Corpus> optCorpus = corpusRepository.findOneByCorpusId(id);
 
         if(optCorpus.isEmpty()) {
-            jsonError.put("Error", "CorpusDoesNotExist");
+            jsonError.put("Error", "Corpus Does Not Exist");
             return ResponseEntity
                     .status(400)
                     .body(jsonError.toString());
@@ -317,8 +317,7 @@ public class CorpusController {
         UserCorpusRole userCorpusRole = new UserCorpusRole(userToAdd, optCorpus.get(), role);
 
         userCorpusRoleRepository.save(userCorpusRole);
-
-
+        
         return ResponseEntity
                 .ok("User successfully added");
 
