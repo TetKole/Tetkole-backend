@@ -4,6 +4,8 @@ import com.tetkole.restservice.payload.request.*;
 import com.tetkole.restservice.payload.response.LoginResponse;
 import com.tetkole.restservice.payload.response.RegisterResponse;
 import com.tetkole.restservice.payload.response.SuccessResponse;
+import com.tetkole.restservice.repositories.MailRepository;
+import com.tetkole.restservice.repositories.UserCorpusRoleRepository;
 import com.tetkole.restservice.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +22,7 @@ public class AuthenticationController {
     private final AuthenticationService service;
 
     @PostMapping()
-    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<SuccessResponse> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(service.register(request));
     }
 
@@ -42,6 +44,11 @@ public class AuthenticationController {
     @PostMapping("/addModerator")
     public ResponseEntity<SuccessResponse> addModerator(@RequestBody RoleChangeRequest request) {
         return ResponseEntity.ok(service.addModerator(request));
+    }
+
+    @PostMapping("/addMailInscription")
+    public ResponseEntity<SuccessResponse> addMailInscription(@RequestBody MailInscriptionRequest request) {
+        return ResponseEntity.ok(service.addMailInscription(request));
     }
 
 }
