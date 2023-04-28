@@ -123,11 +123,15 @@ public class AuthenticationService {
         return new SuccessResponse(false);
     }
 
-    public SuccessResponse addModerator(RoleChangeRequest request) {
-        User user = userRepository.findOneByEmail(request.mail()).orElseThrow();
-        User admin = userRepository.findOneByEmail(request.adminMail()).orElseThrow();
-        if (admin.getRole() == Role.ADMIN || admin.getRole() == Role.MODERATOR){
-            user.setRole(Role.MODERATOR);
+    public SuccessResponse addMAdmin(RoleChangeRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth != null ? auth.getName() : null;
+        User adminUser =  userRepository.findOneByEmail(username).get();
+        Role roleOfRequest = adminUser.getRole();
+
+        User user = userRepository.findOneByEmail(request.mail()).get();
+        if (roleOfRequest == Role.ADMIN){
+            user.setRole(Role.ADMIN);
             userRepository.save(user);
             return new SuccessResponse(true);
         }

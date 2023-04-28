@@ -41,9 +41,9 @@ public class AuthenticationController {
         return ResponseEntity.ok(service.forceResetPassword(request));
     }
 
-    @PostMapping("/addModerator")
+    @PostMapping("/addAdmin")
     public ResponseEntity<SuccessResponse> addModerator(@RequestBody RoleChangeRequest request) {
-        return ResponseEntity.ok(service.addModerator(request));
+        return ResponseEntity.ok(service.addMAdmin(request));
     }
 
     @PostMapping("/addMailInscription")
