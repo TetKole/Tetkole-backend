@@ -23,14 +23,14 @@ public class RestServiceApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) {
-		if (userRepository.existsByEmail("admin@mail.com")) return;
+		if (userRepository.existsByEmail("admin")) return;
 
 		// create a default user
 		User user = new User();
 		user.setFirstname("admin");
 		user.setLastname("admin");
 		user.setPassword(passwordEncoder.encode("admin"));
-		user.setEmail("admin@mail.com");
+		user.setEmail("admin");
 		user.setRole(Role.ADMIN);
 		userRepository.save(user);
 	}

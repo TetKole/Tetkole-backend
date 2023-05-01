@@ -1,9 +1,17 @@
+Au lancement du serveur (peu importe le mode DEV ou PROD), un utilisateur admin est créé par défaut
+avec pour mail (identifiant de connexion) : admin
+et mot de passe : admin
+
+Cet utilisateur pourra vous permettre d'ajouter des mails pouvant s'inscrire à l'application.
+Il est fortement conseillé de changer le mot de passe de cet utilisateur via l'application Tetkole.
+
+
 Pour lancer le projet en mode DEV :
 
 - s'assurer que la ligne CONTEXT:dev N'EST PAS commenté dans le .env situé dans le dossier src/main/resources
 - s'assurer que la ligne CONTEXT:prod EST commenté dans le .env situé dans le dossier src/main/resources
 - executer la commande   docker-compose up -d   dans un terminal (avec docker installé/lancé)
-- lancer le projet sur intelliJ avec la petite flèche en haut a droite
+- lancer le projet sur IntelliJ avec la petite flèche en haut à droite
 
 
 
