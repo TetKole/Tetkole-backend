@@ -27,6 +27,7 @@ public class UserCorpusRole {
     @JoinColumn(name = "corpus_id")
     private Corpus corpus;
 
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     public UserCorpusRole(User user, Corpus corpus, Role role) {
