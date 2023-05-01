@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @Data // lombok, getter and setter
 @Builder // lombok design partern builder
@@ -39,9 +40,19 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     List<UserCorpusRole> corpus;
 
-    public Boolean isUserAdminOfCorpus(Integer corpusId) {
+    public Boolean hasAccessToCorpus(Integer corpusId, Role role) {
         for(UserCorpusRole userCorpus : corpus) {
-            if(userCorpus.getCorpus().getCorpusId() == corpusId) {
+            if(Objects.equals(userCorpus.getCorpus().getCorpusId(), corpusId) && userCorpus.getRole() == role) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public Boolean hasAccessToCorpus(Integer corpusId) {
+        for(UserCorpusRole userCorpus : corpus) {
+            if(Objects.equals(userCorpus.getCorpus().getCorpusId(), corpusId)) {
                 return true;
             }
         }

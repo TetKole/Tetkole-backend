@@ -23,7 +23,7 @@ public class SecurityConfig {
         http
                 .cors().and().csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/corpus/**", "/api/user/forceResetPassword", "/api/user/changePassword")
+                .requestMatchers("/api/corpus/**", "/api/user/**",  "/api/user/forceResetPassword", "/api/user/changePassword")
                 .authenticated()
                 .anyRequest()
                 .permitAll()

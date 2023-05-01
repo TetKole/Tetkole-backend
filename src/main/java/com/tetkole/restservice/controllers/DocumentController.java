@@ -2,6 +2,7 @@ package com.tetkole.restservice.controllers;
 
 import com.tetkole.restservice.models.Annotation;
 import com.tetkole.restservice.models.Document;
+import com.tetkole.restservice.models.Role;
 import com.tetkole.restservice.models.User;
 import com.tetkole.restservice.payload.request.RenameRequest;
 import com.tetkole.restservice.payload.response.SuccessResponse;
@@ -12,6 +13,8 @@ import com.tetkole.restservice.utils.FileManager;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,11 +48,39 @@ public class DocumentController {
                     .body(jsonError.toString());
         }
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth != null ? auth.getName() : null;
+        Optional<User> optUser =  userRepository.findOneByEmail(username);
+
+        if(optUser.isEmpty()) {
+            jsonError.put("Error", "You are not connected");
+            return ResponseEntity
+                    .status(401)
+                    .body(jsonError.toString());
+        }
+
+        int corpusId = document.get().getCorpus().getCorpusId();
+
+        if(!optUser.get().hasAccessToCorpus(corpusId) || optUser.get().hasAccessToCorpus(corpusId, Role.READER)) {
+            jsonError.put("Error", "You are not authorized to do that");
+            return ResponseEntity
+                    .status(403)
+                    .body(jsonError.toString());
+        }
+
         String folderPath = document.get().getCorpus().getName() + "/Annotations/" + document.get().getName();
 
         fileManager.createFolder(folderPath, audioFile.getOriginalFilename());
 
         String path = folderPath + "/" + audioFile.getOriginalFilename();
+
+        Optional<User> user = userRepository.findById(userId);
+        if(user.isEmpty()) {
+            jsonError.put("Error", "The user doesn't exist");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonError.toString());
+        }
 
         if(!fileManager.createMultipartFile(path, audioFile)) {
             jsonError.put("Error", "The document could not be uploaded");
@@ -60,14 +91,6 @@ public class DocumentController {
 
         if(!fileManager.createMultipartFile(path, jsonFile)) {
             jsonError.put("Error", "The document could not be uploaded");
-            return ResponseEntity
-                    .badRequest()
-                    .body(jsonError.toString());
-        }
-
-        Optional<User> user = userRepository.findById(userId);
-        if(user.isEmpty()) {
-            jsonError.put("Error", "The user doesn't exists");
             return ResponseEntity
                     .badRequest()
                     .body(jsonError.toString());
@@ -109,6 +132,25 @@ public class DocumentController {
                     .body(jsonError.toString());
         }
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth != null ? auth.getName() : null;
+        Optional<User> optUser =  userRepository.findOneByEmail(username);
+
+        if(optUser.isEmpty()) {
+            jsonError.put("Error", "You are not connected");
+            return ResponseEntity
+                    .status(401)
+                    .body(jsonError.toString());
+        }
+
+        int corpusId = document.get().getCorpus().getCorpusId();
+
+        if(!optUser.get().hasAccessToCorpus(corpusId) || optUser.get().hasAccessToCorpus(corpusId, Role.READER)) {
+            jsonError.put("Error", "You are not authorized to do that");
+            return ResponseEntity
+                    .status(403)
+                    .body(jsonError.toString());
+        }
 
         Optional<Annotation> annotation = annotationRepository.findById(annotationId);
         if (annotation.isEmpty()) {
@@ -154,6 +196,26 @@ public class DocumentController {
                     .body(jsonError.toString());
         }
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth != null ? auth.getName() : null;
+        Optional<User> optUser =  userRepository.findOneByEmail(username);
+
+        if(optUser.isEmpty()) {
+            jsonError.put("Error", "You are not connected");
+            return ResponseEntity
+                    .status(401)
+                    .body(jsonError.toString());
+        }
+
+        int corpusId = document.get().getCorpus().getCorpusId();
+
+        if(!optUser.get().hasAccessToCorpus(corpusId) || optUser.get().hasAccessToCorpus(corpusId, Role.READER)) {
+            jsonError.put("Error", "You are not authorized to do that");
+            return ResponseEntity
+                    .status(403)
+                    .body(jsonError.toString());
+        }
+
         // delete from database
         documentRepository.deleteById(docID);
 
@@ -193,6 +255,26 @@ public class DocumentController {
                     .body(jsonError.toString());
         }
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth != null ? auth.getName() : null;
+        Optional<User> optUser =  userRepository.findOneByEmail(username);
+
+        if(optUser.isEmpty()) {
+            jsonError.put("Error", "You are not connected");
+            return ResponseEntity
+                    .status(401)
+                    .body(jsonError.toString());
+        }
+
+        int corpusId = annotation.get().getDocument().getCorpus().getCorpusId();
+
+        if(!optUser.get().hasAccessToCorpus(corpusId) || optUser.get().hasAccessToCorpus(corpusId, Role.READER)) {
+            jsonError.put("Error", "You are not authorized to do that");
+            return ResponseEntity
+                    .status(403)
+                    .body(jsonError.toString());
+        }
+
         // TODO catch si ça marche pas et faire une réponse que ça a pas marché
         fileManager.renameAnnotation(annotation.get(), renameRequest.newName());
 
@@ -215,6 +297,26 @@ public class DocumentController {
             jsonError.put("Error", "The document doesn't exist");
             return ResponseEntity
                     .badRequest()
+                    .body(jsonError.toString());
+        }
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth != null ? auth.getName() : null;
+        Optional<User> optUser =  userRepository.findOneByEmail(username);
+
+        if(optUser.isEmpty()) {
+            jsonError.put("Error", "You are not connected");
+            return ResponseEntity
+                    .status(401)
+                    .body(jsonError.toString());
+        }
+
+        int corpusId = document.get().getCorpus().getCorpusId();
+
+        if(!optUser.get().hasAccessToCorpus(corpusId) || optUser.get().hasAccessToCorpus(corpusId, Role.READER)) {
+            jsonError.put("Error", "You are not authorized to do that");
+            return ResponseEntity
+                    .status(403)
                     .body(jsonError.toString());
         }
 

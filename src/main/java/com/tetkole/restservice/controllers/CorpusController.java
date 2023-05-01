@@ -108,6 +108,25 @@ public class CorpusController {
                     .badRequest()
                     .body(jsonError.toString());
         }
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth != null ? auth.getName() : null;
+        Optional<User> optUser =  userRepository.findOneByEmail(username);
+
+        if(optUser.isEmpty()) {
+            jsonError.put("Error", "You are not connected");
+            return ResponseEntity
+                    .status(401)
+                    .body(jsonError.toString());
+        }
+
+        if(!optUser.get().hasAccessToCorpus(corpusId) || optUser.get().hasAccessToCorpus(corpusId, Role.READER)) {
+            jsonError.put("Error", "You are not authorized to do that");
+            return ResponseEntity
+                    .status(403)
+                    .body(jsonError.toString());
+        }
+
         String corpusName = corpus.get().getName();
 
         if (corpusRepository.existsDocumentByName(file.getOriginalFilename())) {
@@ -150,6 +169,25 @@ public class CorpusController {
             jsonError.put("Error", "The corpus doesn't exist");
             return ResponseEntity
                     .badRequest()
+                    .body(jsonError.toString());
+        }
+        int corpusId = corpus.get().getCorpusId();
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth != null ? auth.getName() : null;
+        Optional<User> optUser =  userRepository.findOneByEmail(username);
+
+        if(optUser.isEmpty()) {
+            jsonError.put("Error", "You are not connected");
+            return ResponseEntity
+                    .status(401)
+                    .body(jsonError.toString());
+        }
+
+        if(!optUser.get().hasAccessToCorpus(corpusId)) {
+            jsonError.put("Error", "You are not authorized to do that");
+            return ResponseEntity
+                    .status(403)
                     .body(jsonError.toString());
         }
 
@@ -267,6 +305,11 @@ public class CorpusController {
         return new ResponseEntity<>(response.toString(),HttpStatus.OK);
     }
 
+    /**
+     * @param id
+     * @param requestBody
+     * @return
+     */
     @PostMapping("/{id}/users")
     public ResponseEntity<?> addNewUserToCorpus(@Valid @PathVariable Integer id,
                                                 @Valid @RequestBody CorpusAddNewUserRequest requestBody) {
@@ -294,7 +337,7 @@ public class CorpusController {
 
         User user = optUser.get();
 
-        if(!user.isUserAdminOfCorpus(id)) {
+        if(!user.hasAccessToCorpus(id, Role.MODERATOR)) {
             jsonError.put("Error", "You are not authorized to do that");
             return ResponseEntity
                     .status(403)
