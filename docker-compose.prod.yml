@@ -36,12 +36,15 @@ services:
     ports:
       - 8000:8000
     restart: always
+    volumes:
+      - tetkole-resources:/tetkole-resources
     networks:
       - tetkole-prod-network
 
 
 volumes:
   tetkole-database:
+  tetkole-resources:
 
 
 networks:

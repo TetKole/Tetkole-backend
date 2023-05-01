@@ -23,44 +23,16 @@ import java.util.zip.ZipOutputStream;
 @Service
 public class FileManager {
 
-    private final String resourcesDir = "Tetkole-backend-resources";
-    private final String path;
+    private final String path = "tetkole-resources";
     private final String versionsDirectory = "/versions";
     private final String corpusDirectory = "/corpus";
     private final String CORPUS_STATE = "corpus_state.json";
 
 
     public FileManager() {
-        /* first we manage to get the ressources folder */
-
-        // get the working folder
-        String tempPath = System.getProperty("user.dir");
-
-        // replace all \ by / (usefull on windows)
-        tempPath = tempPath.replaceAll(Pattern.quote("\\"), "/");
-
-        // split path by /
-        String[] splitPath = tempPath.split("/");
-
-        // remove last element (ie the working dir)
-        splitPath = Arrays.copyOf(splitPath, splitPath.length - 1);
-
-        // rebuilding the path without the working dir
-        tempPath = "";
-        StringBuilder sb = new StringBuilder();
-        for (String elem: splitPath)
-            tempPath = sb.append(elem).append("/").toString();
-
-        // adding the ressources dir
-        tempPath = sb.append(this.resourcesDir).toString();
-
-        // set path to the resourcesDir
-        this.path = tempPath;
-        // create it if needed
-        if (new File(this.path).mkdir()) {
-            new File(this.path + versionsDirectory).mkdir();
-            new File(this.path + corpusDirectory).mkdir();
-        }
+        new File(this.path).mkdir();
+        new File(this.path + versionsDirectory).mkdir();
+        new File(this.path + corpusDirectory).mkdir();
     }
 
     /**
