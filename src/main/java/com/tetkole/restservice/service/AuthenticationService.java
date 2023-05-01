@@ -61,8 +61,6 @@ public class AuthenticationService {
                 .role(Role.USER)
                 .build();
 
-        System.out.println(user.getEmail());
-
         userRepository.save(user);
         mailRepository.delete(mailDB.get());
 

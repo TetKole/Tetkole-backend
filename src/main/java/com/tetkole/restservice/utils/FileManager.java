@@ -258,7 +258,6 @@ public class FileManager {
         String destPath = this.path + corpusDirectory + "/" + annotation.getDocument().getCorpus().getName() + "/Annotations/" + annotation.getDocument().getName() + "/" + newName;
         File source = new File(this.path + corpusDirectory + "/" + annotation.getDocument().getCorpus().getName() + "/Annotations/" + annotation.getDocument().getName() + "/" + annotation.getName());
         File dest = new File(destPath);
-        System.out.println(destPath);
         dest.mkdir();
         File[] files = source.listFiles();
         if (files != null) {
