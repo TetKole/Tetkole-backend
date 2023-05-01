@@ -57,9 +57,7 @@ public class FileManager {
         // set path to the resourcesDir
         this.path = tempPath;
         // create it if needed
-        if (!new File(this.path).mkdir())
-            System.out.println("INFO: " + this.path + " already exists.");
-        else {
+        if (new File(this.path).mkdir()) {
             new File(this.path + versionsDirectory).mkdir();
             new File(this.path + corpusDirectory).mkdir();
         }
@@ -128,15 +126,13 @@ public class FileManager {
     public void createCorpusFolder(String folderName) {
         String absolutePath = this.path + corpusDirectory + "/" + folderName;
 
-        if (!new File(absolutePath).mkdir())
-            System.out.println("INFO: " + absolutePath + " already exists.");
+        new File(absolutePath).mkdir();
     }
 
     public void createFolder(String relativePath, String folderName) {
         String absolutePath = this.path + corpusDirectory + "/" + relativePath + "/" + folderName;
 
-        if (!new File(absolutePath).mkdir())
-            System.out.println("INFO: " + absolutePath + " already exists.");
+        new File(absolutePath).mkdir();
     }
 
     public File createFile(String relativePath, String fileName) {
@@ -144,8 +140,6 @@ public class FileManager {
         try {
             if (file.createNewFile())
                 return file;
-            else
-                System.out.println("File " + file.getName() + " already exists");
         } catch (IOException e) {
             System.err.println("Could not create " + file.getName());
         }
