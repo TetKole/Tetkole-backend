@@ -169,10 +169,25 @@ public class CorpusController {
     @GetMapping ("/list")
     public ResponseEntity<?> getAll()
     {
-        //Get all corpus name
-        List<Corpus> listCorpus = corpusRepository.findAll();
+        JSONObject jsonError = new JSONObject();
+
+        //Get all corpus name where user has access
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth != null ? auth.getName() : null;
+        Optional<User> optUser =  userRepository.findOneByEmail(username);
+
+        if(optUser.isEmpty()) {
+            jsonError.put("Error", "You are not connected");
+            return ResponseEntity
+                    .status(401)
+                    .body(jsonError.toString());
+        }
+
+        User user = optUser.get();
+
+        List<UserCorpusRole> listCorpus = userCorpusRoleRepository.findAllByUser(user);
         JSONArray response = new JSONArray();
-        listCorpus.forEach(corpus -> response.put(corpus.toJson()));
+        listCorpus.forEach(userCorpus -> response.put(userCorpus.getCorpus().toJson()));
         if(listCorpus.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
