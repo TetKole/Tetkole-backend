@@ -80,8 +80,11 @@ public class CorpusController {
         Corpus corpus = new Corpus(corpusName);
         corpusRepository.save(corpus);
         userCorpusRoleRepository.save(new UserCorpusRole(user.get(), corpus, Role.MODERATOR));
-
-
+        List<User> admins = userRepository.findAllByRole(Role.ADMIN);
+        for (User admin: admins) {
+            userCorpusRoleRepository.save(new UserCorpusRole(admin, corpus, Role.MODERATOR));
+        }
+        
         // création de corpus_state.json
         fileManager.createCorpusState(corpus);
 
