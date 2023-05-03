@@ -82,7 +82,7 @@ public class CorpusController {
         userCorpusRoleRepository.save(new UserCorpusRole(user.get(), corpus, Role.MODERATOR));
         List<User> admins = userRepository.findAllByRole(Role.ADMIN);
         for (User admin: admins) {
-            userCorpusRoleRepository.save(new UserCorpusRole(admin, corpus, Role.MODERATOR));
+            userCorpusRoleRepository.save(new UserCorpusRole(admin, corpus, Role.ADMIN));
         }
         
         // création de corpus_state.json
@@ -340,7 +340,7 @@ public class CorpusController {
 
         User user = optUser.get();
 
-        if(!user.hasAccessToCorpus(id, Role.MODERATOR)) {
+        if(!(user.hasAccessToCorpus(id, Role.MODERATOR) || user.hasAccessToCorpus(id, Role.ADMIN))) {
             jsonError.put("Error", "You are not authorized to do that");
             return ResponseEntity
                     .status(403)
